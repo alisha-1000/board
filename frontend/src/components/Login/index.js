@@ -1,24 +1,24 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import styles from './index.module.css';
-import boardContext from '../../store/board-context';
-import { connectSocket } from "../../utils/socket";
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import styles from "./index.module.css";
+import boardContext from "../../store/board-context";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { isUserLoggedIn, setUserLoginStatus } = useContext(boardContext);
+  const { setUserLoginStatus } = useContext(boardContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const response = await fetch(
-        'https://board-1-lrt8.onrender.com/api/users/login',
+        "https://board-1-lrt8.onrender.com/api/users/login",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ email, password }),
         }
@@ -27,22 +27,30 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('whiteboard_user_token', data.token);
+        // ✅ save JWT
+        localStorage.setItem("whiteboard_user_token", data.token);
+
+        // ✅ update global auth state
         setUserLoginStatus(true);
-        connectSocket();
-        navigate('/');
+
+        // ❌ DO NOT connect socket here
+        // socket is handled in App.jsx
+
+        // ✅ redirect to board
+        navigate("/");
       } else {
-        alert(data.message || 'Login failed');
+        alert(data.message || "Login failed");
       }
     } catch (error) {
-      console.error('Login error:', error);
-      alert('An error occurred during login');
+      console.error("Login error:", error);
+      alert("An error occurred during login");
     }
   };
 
   return (
     <div className={styles.loginContainer}>
       <h2>Login</h2>
+
       <form onSubmit={handleSubmit} className={styles.loginForm}>
         <input
           type="email"
@@ -51,6 +59,7 @@ const Login = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -58,10 +67,12 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
         <button type="submit">Login</button>
       </form>
+
       <p>
-        Don't have an account? <Link to="/register">Register here</Link>
+        Don&apos;t have an account? <Link to="/register">Register here</Link>
       </p>
     </div>
   );
