@@ -10,19 +10,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       alert("Passwords don't match");
       return;
     }
+
     try {
-      const response = await fetch('https://whiteboard-1-2e0z.onrender.com/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        'https://board-1-lrt8.onrender.com/api/users/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
       const data = await response.json();
+
       if (response.ok) {
         alert('Registration successful');
         navigate('/login');

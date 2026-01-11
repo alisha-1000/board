@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  "https://whiteboard-1-2e0z.onrender.com/api/canvas";
+  "https://board-1-lrt8.onrender.com/api/canvas";
 
 /* ---------------- HELPERS ---------------- */
 

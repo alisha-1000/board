@@ -4,25 +4,28 @@ import styles from './index.module.css';
 import boardContext from '../../store/board-context';
 import { connectSocket } from "../../utils/socket";
 
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { isUserLoggedIn,setUserLoginStatus } = useContext(boardContext);
+  const { isUserLoggedIn, setUserLoginStatus } = useContext(boardContext);
 
-  console.log(isUserLoggedIn);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://whiteboard-1-2e0z.onrender.com/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        'https://board-1-lrt8.onrender.com/api/users/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
       const data = await response.json();
+
       if (response.ok) {
         localStorage.setItem('whiteboard_user_token', data.token);
         setUserLoginStatus(true);
