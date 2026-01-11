@@ -104,7 +104,13 @@ io.on("connection", (socket) => {
       });
     });
 
-const PORT = 5001;
+
+
+const PORT = process.env.PORT || 5001;
+
+app.get("/", (req, res) => {
+  res.send("Board backend running 🚀");
+});
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
