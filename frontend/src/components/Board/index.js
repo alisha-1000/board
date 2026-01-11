@@ -105,13 +105,20 @@ function Board({ id }) {
           break;
 
         case TOOL_ITEMS.BRUSH: {
-          context.fillStyle = element.stroke;
-          const path = new Path2D(
-            getSvgPathFromStroke(getStroke(element.points))
-          );
-          context.fill(path);
-          break;
-        }
+        context.fillStyle = element.stroke;
+
+        const stroke = getStroke(element.points, {
+          size: element.size,        // ⭐ MAIN FIX
+          thinning: 0.6,
+          smoothing: 0.5,
+          streamline: 0.5,
+        });
+
+        const path = new Path2D(getSvgPathFromStroke(stroke));
+        context.fill(path);
+        break;
+      }
+
 
         case TOOL_ITEMS.TEXT:
           context.textBaseline = "top";
@@ -181,3 +188,5 @@ function Board({ id }) {
 }
 
 export default Board;
+
+
