@@ -12,7 +12,9 @@ export const connectSocket = () => {
   }
 
   socket = io("https://board-1-lrt8.onrender.com", {
-    extraHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+    auth: {
+      token: token ? `Bearer ${token}` : null,
+    },
     transports: ["websocket"],
   });
 
