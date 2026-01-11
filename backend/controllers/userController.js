@@ -1,5 +1,4 @@
 const User = require("../models/userModel");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
@@ -14,16 +13,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await User.create({
-      email,
-      password: hashedPassword,
-    });
+    await User.create({ email, password });
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Registration failed" });
   }
 };
@@ -38,7 +31,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -51,18 +44,16 @@ const loginUser = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Login failed" });
   }
 };
 
-/* ---------- GET USER ---------- */
+/* ---------- GET USER (🔥 THIS WAS MISSING) ---------- */
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.user.userId).select("-password");
     res.json(user);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Failed to fetch user" });
   }
 };
@@ -70,5 +61,5 @@ const getUser = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
-  getUser,
+  getUser, // ✅ MUST
 };
