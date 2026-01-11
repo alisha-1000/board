@@ -1,6 +1,4 @@
-// import React, { useCallback, useReducer } from "react";
 import React, { useReducer } from "react";
-
 import boardContext from "./board-context";
 import { BOARD_ACTIONS, TOOL_ACTION_TYPES, TOOL_ITEMS } from "../constants";
 import { createElement, isPointNearElement } from "../utils/element";
@@ -158,6 +156,8 @@ const initialBoardState = {
 const BoardProvider = ({ children }) => {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState);
 
+  /* ---------- TOOL HANDLERS ---------- */
+
   const changeToolHandler = (tool) =>
     dispatch({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: { tool } });
 
@@ -213,25 +213,51 @@ const BoardProvider = ({ children }) => {
     });
   };
 
+  /* ---------- TEXTAREA BLUR HANDLER (FIX) ---------- */
+
+  const textAreaBlurHandler = (e) => {
+  const value = e?.target?.value;
+
+  if (value === undefined) return;
+  if (state.elements.length === 0) return;
+
+  dispatch({
+    type: BOARD_ACTIONS.CHANGE_TEXT,
+    payload: { text: value },
+  });
+};
+
+
+  /* ---------- CONTEXT VALUE ---------- */
+
   const contextValue = {
     activeToolItem: state.activeToolItem,
     elements: state.elements,
     toolActionType: state.toolActionType,
     canvasId: state.canvasId,
     isUserLoggedIn: state.isUserLoggedIn,
+
     changeToolHandler,
     boardMouseDownHandler,
     boardMouseMoveHandler,
     boardMouseUpHandler,
+    textAreaBlurHandler, // ✅ IMPORTANT
+
     undo: () => dispatch({ type: BOARD_ACTIONS.UNDO }),
     redo: () => dispatch({ type: BOARD_ACTIONS.REDO }),
+
     setCanvasId: (canvasId) =>
-      dispatch({ type: BOARD_ACTIONS.SET_CANVAS_ID, payload: { canvasId } }),
+      dispatch({
+        type: BOARD_ACTIONS.SET_CANVAS_ID,
+        payload: { canvasId },
+      }),
+
     setElements: (elements) =>
       dispatch({
         type: BOARD_ACTIONS.SET_CANVAS_ELEMENTS,
         payload: { elements },
       }),
+
     setUserLoginStatus: (isUserLoggedIn) =>
       dispatch({
         type: BOARD_ACTIONS.SET_USER_LOGIN_STATUS,

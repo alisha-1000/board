@@ -21,6 +21,14 @@ const Sidebar = () => {
     setUserLoginStatus,
   } = useContext(boardContext);
 
+  /* ---------------- AUTH GUARD ---------------- */
+  useEffect(() => {
+    if (!token) {
+      setUserLoginStatus(false);
+      navigate("/login");
+    }
+  }, [token, navigate, setUserLoginStatus]);
+
   /* ---------------- CREATE CANVAS ---------------- */
   const handleCreateCanvas = useCallback(async () => {
     try {
@@ -32,10 +40,12 @@ const Sidebar = () => {
         }
       );
 
-      setCanvasId(response.data.canvasId);
-      navigate(`/${response.data.canvasId}`);
-    } catch (error) {
-      console.error("Error creating canvas:", error);
+      const newCanvasId = response.data.canvasId;
+      setCanvasId(newCanvasId);
+      navigate(`/${newCanvasId}`);
+    } catch (err) {
+      console.error("Error creating canvas:", err);
+      setError("Failed to create canvas");
     }
   }, [token, navigate, setCanvasId]);
 
@@ -49,37 +59,46 @@ const Sidebar = () => {
         }
       );
 
-      setCanvases(response.data);
+      const list = response.data || [];
+      setCanvases(list);
 
-      if (response.data.length === 0) {
-        await handleCreateCanvas();
-      } else if (!canvasId && !id) {
-        setCanvasId(response.data[0]._id);
-        navigate(`/${response.data[0]._id}`);
+      // Auto select first canvas
+      if (!canvasId && !id && list.length > 0) {
+        setCanvasId(list[0]._id);
+        navigate(`/${list[0]._id}`);
       }
     } catch (err) {
       console.error("Error fetching canvases:", err);
+      setError("Failed to load canvases");
     }
-  }, [token, canvasId, id, navigate, setCanvasId, handleCreateCanvas]);
+  }, [token, canvasId, id, navigate, setCanvasId]);
 
+  /* ---------------- INITIAL LOAD ---------------- */
   useEffect(() => {
-    if (isUserLoggedIn) {
-      fetchCanvases();
-    }
+    if (!isUserLoggedIn) return;
+    fetchCanvases();
   }, [isUserLoggedIn, fetchCanvases]);
 
   /* ---------------- DELETE CANVAS ---------------- */
-  const handleDeleteCanvas = async (canvasId) => {
+  const handleDeleteCanvas = async (deleteId) => {
     try {
       await axios.delete(
-        `https://whiteboard-1-2e0z.onrender.com/api/canvas/delete/${canvasId}`,
+        `https://whiteboard-1-2e0z.onrender.com/api/canvas/delete/${deleteId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
+      // If current canvas deleted
+      if (deleteId === canvasId) {
+        setCanvasId("");
+        navigate("/");
+      }
+
       fetchCanvases();
-    } catch (error) {
-      console.error("Error deleting canvas:", error);
+    } catch (err) {
+      console.error("Error deleting canvas:", err);
+      setError("Failed to delete canvas");
     }
   };
 
@@ -101,10 +120,11 @@ const Sidebar = () => {
       );
 
       setSuccess(response.data.message);
-      setTimeout(() => setSuccess(""), 4000);
+      setEmail("");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to share canvas");
-      setTimeout(() => setError(""), 4000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -113,11 +133,13 @@ const Sidebar = () => {
     localStorage.removeItem("whiteboard_user_token");
     setUserLoginStatus(false);
     setCanvases([]);
+    setCanvasId("");
     navigate("/login");
   };
 
   const handleLogin = () => navigate("/login");
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="sidebar">
       <button
@@ -140,7 +162,7 @@ const Sidebar = () => {
               className="canvas-name"
               onClick={() => navigate(`/${canvas._id}`)}
             >
-              {canvas._id}
+              {canvas._id.slice(-6)}
             </span>
             <button
               className="delete-button"
@@ -159,7 +181,7 @@ const Sidebar = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <button onClick={handleShare} disabled={!isUserLoggedIn}>
+        <button onClick={handleShare} disabled={!isUserLoggedIn || !canvasId}>
           Share
         </button>
         {error && <p className="error-message">{error}</p>}
