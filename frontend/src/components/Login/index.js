@@ -1,57 +1,46 @@
 import React, { useState, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import styles from "./index.module.css";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import boardContext from "../../store/board-context";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
   const { setUserLoginStatus } = useContext(boardContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const response = await fetch(
+      const res = await axios.post(
         "https://board-1-lrt8.onrender.com/api/users/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
+        { email, password }
       );
 
-      const data = await response.json();
+      const token = res.data.token;
 
-      if (response.ok) {
-        // ✅ save JWT
-        localStorage.setItem("whiteboard_user_token", data.token);
+      // 🔥 THESE 3 LINES ARE CRITICAL
+      localStorage.setItem("whiteboard_user_token", token);
+      setUserLoginStatus(true);
 
-        // ✅ update global auth state
-        setUserLoginStatus(true);
+      // 🔥 FORCE SIDEBAR TO RE-READ TOKEN
+      window.location.href = "/"; 
+      // (simple + safe way)
 
-        // ❌ DO NOT connect socket here
-        // socket is handled in App.jsx
-
-        // ✅ redirect to board
-        navigate("/");
-      } else {
-        alert(data.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("An error occurred during login");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className={styles.loginContainer}>
+    <div className="login-container">
       <h2>Login</h2>
 
-      <form onSubmit={handleSubmit} className={styles.loginForm}>
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
@@ -71,9 +60,7 @@ const Login = () => {
         <button type="submit">Login</button>
       </form>
 
-      <p>
-        Don&apos;t have an account? <Link to="/register">Register here</Link>
-      </p>
+      {error && <p className="error">{error}</p>}
     </div>
   );
 };

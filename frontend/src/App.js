@@ -1,5 +1,14 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, useParams, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useParams,
+  Navigate,
+} from "react-router-dom";
+
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import Board from "./components/Board";
 import Toolbar from "./components/Toolbar";
 import Toolbox from "./components/Toolbox";
@@ -14,13 +23,25 @@ import { connectSocket, disconnectSocket } from "./utils/socket";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("whiteboard_user_token");
-  return token ? children : <Navigate to="/login" replace />;
+
+  if (!token) {
+    disconnectSocket(); // 🔥 important
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 /* -------- Home Page -------- */
 
 function HomePage() {
   const { id } = useParams();
+
+  // 🔥 CONNECT SOCKET WHEN HOME LOADS (AUTHENTICATED)
+  useEffect(() => {
+    connectSocket();
+    return () => disconnectSocket();
+  }, []);
 
   return (
     <ToolboxProvider>
@@ -37,40 +58,35 @@ function HomePage() {
 /* -------- App -------- */
 
 function App() {
-  useEffect(() => {
-    const token = localStorage.getItem("whiteboard_user_token");
-    if (token) connectSocket();
-
-    return () => disconnectSocket();
-  }, []);
-
   return (
-    <BoardProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <GoogleOAuthProvider clientId="727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com">
+      <BoardProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/:id"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </BoardProvider>
+            <Route
+              path="/:id"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Router>
+      </BoardProvider>
+    </GoogleOAuthProvider>
   );
 }
 

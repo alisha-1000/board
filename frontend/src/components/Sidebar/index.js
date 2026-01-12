@@ -10,7 +10,11 @@ const Sidebar = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const token = localStorage.getItem("whiteboard_user_token");
+  // ✅ TOKEN AS STATE (IMPORTANT)
+  const [token, setToken] = useState(
+    localStorage.getItem("whiteboard_user_token")
+  );
+
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -25,12 +29,16 @@ const Sidebar = () => {
   useEffect(() => {
     if (!token) {
       setUserLoginStatus(false);
+      setCanvases([]);
+      setCanvasId("");
       navigate("/login");
     }
-  }, [token, navigate, setUserLoginStatus]);
+  }, [token, navigate, setUserLoginStatus, setCanvasId]);
 
   /* ---------------- CREATE CANVAS ---------------- */
   const handleCreateCanvas = useCallback(async () => {
+    if (!token) return;
+
     try {
       const response = await axios.post(
         "https://board-1-lrt8.onrender.com/api/canvas/create",
@@ -44,13 +52,15 @@ const Sidebar = () => {
       setCanvasId(newCanvasId);
       navigate(`/${newCanvasId}`);
     } catch (err) {
-      console.error("Error creating canvas:", err);
+      console.error("Create canvas error:", err.response?.data);
       setError("Failed to create canvas");
     }
   }, [token, navigate, setCanvasId]);
 
   /* ---------------- FETCH CANVASES ---------------- */
   const fetchCanvases = useCallback(async () => {
+    if (!token) return;
+
     try {
       const response = await axios.get(
         "https://board-1-lrt8.onrender.com/api/canvas/list",
@@ -62,25 +72,26 @@ const Sidebar = () => {
       const list = response.data || [];
       setCanvases(list);
 
-      // Auto select first canvas
       if (!canvasId && !id && list.length > 0) {
         setCanvasId(list[0]._id);
         navigate(`/${list[0]._id}`);
       }
     } catch (err) {
-      console.error("Error fetching canvases:", err);
+      console.error("Fetch canvases error:", err.response?.data);
       setError("Failed to load canvases");
     }
   }, [token, canvasId, id, navigate, setCanvasId]);
 
   /* ---------------- INITIAL LOAD ---------------- */
   useEffect(() => {
-    if (!isUserLoggedIn) return;
+    if (!isUserLoggedIn || !token) return;
     fetchCanvases();
-  }, [isUserLoggedIn, fetchCanvases]);
+  }, [isUserLoggedIn, token, fetchCanvases]);
 
   /* ---------------- DELETE CANVAS ---------------- */
   const handleDeleteCanvas = async (deleteId) => {
+    if (!token) return;
+
     try {
       await axios.delete(
         `https://board-1-lrt8.onrender.com/api/canvas/delete/${deleteId}`,
@@ -96,7 +107,7 @@ const Sidebar = () => {
 
       fetchCanvases();
     } catch (err) {
-      console.error("Error deleting canvas:", err);
+      console.error("Delete canvas error:", err.response?.data);
       setError("Failed to delete canvas");
     }
   };
@@ -107,6 +118,7 @@ const Sidebar = () => {
       setError("Please enter an email");
       return;
     }
+    if (!canvasId || !token) return;
 
     try {
       setError("");
@@ -115,14 +127,17 @@ const Sidebar = () => {
       const response = await axios.put(
         `https://board-1-lrt8.onrender.com/api/canvas/share/${canvasId}`,
         { email },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
-      setSuccess(response.data.message);
+      setSuccess(response.data.message || "Canvas shared successfully");
       setEmail("");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to share canvas");
+      console.error("Share error:", err.response?.data);
+      setError(err.response?.data?.message || "Failed to share canvas");
       setTimeout(() => setError(""), 3000);
     }
   };
@@ -130,6 +145,7 @@ const Sidebar = () => {
   /* ---------------- AUTH ---------------- */
   const handleLogout = () => {
     localStorage.removeItem("whiteboard_user_token");
+    setToken(null);
     setUserLoginStatus(false);
     setCanvases([]);
     setCanvasId("");
@@ -144,7 +160,7 @@ const Sidebar = () => {
       <button
         className="create-button"
         onClick={handleCreateCanvas}
-        disabled={!isUserLoggedIn}
+        disabled={!isUserLoggedIn || !token}
       >
         + Create New Canvas
       </button>

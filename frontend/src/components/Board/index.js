@@ -29,6 +29,13 @@ function Board({ id }) {
   const { toolboxState } = useContext(toolboxContext);
   const [isAuthorized, setIsAuthorized] = useState(true);
 
+  /* ---------------- SET CANVAS ID (CRITICAL FIX) ---------------- */
+  useEffect(() => {
+    if (!id) return;
+    // 🔥 ALWAYS set canvasId (independent of socket)
+    setCanvasId(id);
+  }, [id, setCanvasId]);
+
   /* ---------------- SOCKET SETUP ---------------- */
   useEffect(() => {
     if (!id) return;
@@ -36,7 +43,6 @@ function Board({ id }) {
     const socket = getSocket();
     if (!socket) return;
 
-    setCanvasId(id);
     socket.emit("joinCanvas", { canvasId: id });
 
     const handleReceive = (updatedElements) => {
@@ -63,7 +69,7 @@ function Board({ id }) {
       socket.off("loadCanvas", handleLoad);
       socket.off("unauthorized", handleUnauthorized);
     };
-  }, [id, setCanvasId, setElements, setHistory]);
+  }, [id, setElements, setHistory]);
 
   /* ---------------- CANVAS SIZE ---------------- */
   useEffect(() => {
@@ -105,20 +111,19 @@ function Board({ id }) {
           break;
 
         case TOOL_ITEMS.BRUSH: {
-        context.fillStyle = element.stroke;
+          context.fillStyle = element.stroke;
 
-        const stroke = getStroke(element.points, {
-          size: element.size,        // ⭐ MAIN FIX
-          thinning: 0.6,
-          smoothing: 0.5,
-          streamline: 0.5,
-        });
+          const stroke = getStroke(element.points, {
+            size: element.size,
+            thinning: 0.6,
+            smoothing: 0.5,
+            streamline: 0.5,
+          });
 
-        const path = new Path2D(getSvgPathFromStroke(stroke));
-        context.fill(path);
-        break;
-      }
-
+          const path = new Path2D(getSvgPathFromStroke(stroke));
+          context.fill(path);
+          break;
+        }
 
         case TOOL_ITEMS.TEXT:
           context.textBaseline = "top";
@@ -188,5 +193,3 @@ function Board({ id }) {
 }
 
 export default Board;
-
-
