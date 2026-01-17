@@ -19,25 +19,26 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import { connectSocket, disconnectSocket } from "./utils/socket";
 
-/* -------- Protected Route -------- */
+/* ---------------- PROTECTED ROUTE ---------------- */
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("whiteboard_user_token");
+  // ✅ FIX: correct token key
+  const token = localStorage.getItem("token");
 
   if (!token) {
-    disconnectSocket(); // 🔥 important
+    disconnectSocket(); // stop socket if unauthenticated
     return <Navigate to="/login" replace />;
   }
 
   return children;
 };
 
-/* -------- Home Page -------- */
+/* ---------------- HOME PAGE ---------------- */
 
 function HomePage() {
   const { id } = useParams();
 
-  // 🔥 CONNECT SOCKET WHEN HOME LOADS (AUTHENTICATED)
+  // ✅ Socket connects ONLY ONCE when authenticated HomePage mounts
   useEffect(() => {
     connectSocket();
     return () => disconnectSocket();
@@ -55,19 +56,23 @@ function HomePage() {
   );
 }
 
-/* -------- App -------- */
+/* ---------------- APP ROOT ---------------- */
 
 function App() {
-  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com";
+  const googleClientId =
+    process.env.REACT_APP_GOOGLE_CLIENT_ID ||
+    "727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com";
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <BoardProvider>
         <Router>
           <Routes>
+            {/* PUBLIC ROUTES */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
+            {/* PROTECTED ROUTES */}
             <Route
               path="/"
               element={

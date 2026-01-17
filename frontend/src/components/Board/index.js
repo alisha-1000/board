@@ -1,10 +1,10 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
-import rough from "roughjs";
+import rough from "roughjs/bin/rough";
 import boardContext from "../../store/board-context";
 import toolboxContext from "../../store/toolbox-context";
 import { TOOL_ACTION_TYPES, TOOL_ITEMS } from "../../constants";
 import { getSocket } from "../../utils/socket";
-import { getSvgPathFromStroke } from "../../utils/element";
+import { getSvgPathFromStroke, restoreElements } from "../../utils/element";
 import getStroke from "perfect-freehand";
 import classes from "./index.module.css";
 
@@ -23,7 +23,6 @@ function Board({ id }) {
     redo,
     setCanvasId,
     setElements,
-    setHistory,
   } = useContext(boardContext);
 
   const { toolboxState } = useContext(toolboxContext);
@@ -46,13 +45,11 @@ function Board({ id }) {
     socket.emit("joinCanvas", { canvasId: id });
 
     const handleReceive = (updatedElements) => {
-      setElements(updatedElements);
-      setHistory(updatedElements);
+      setElements(updatedElements.map(restoreElements));
     };
 
     const handleLoad = (initialElements) => {
-      setElements(initialElements);
-      setHistory(initialElements);
+      setElements(initialElements.map(restoreElements));
     };
 
     const handleUnauthorized = () => {
@@ -69,7 +66,7 @@ function Board({ id }) {
       socket.off("loadCanvas", handleLoad);
       socket.off("unauthorized", handleUnauthorized);
     };
-  }, [id, setElements, setHistory]);
+  }, [id, setElements]);
 
   /* ---------------- CANVAS SIZE ---------------- */
   useEffect(() => {
@@ -93,6 +90,7 @@ function Board({ id }) {
 
   /* ---------------- DRAWING ---------------- */
   useLayoutEffect(() => {
+    console.log("🎨 Rendering elements:", elements.length, elements);
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -107,19 +105,21 @@ function Board({ id }) {
         case TOOL_ITEMS.RECTANGLE:
         case TOOL_ITEMS.CIRCLE:
         case TOOL_ITEMS.ARROW:
+          if (!element.roughEle) {
+            console.warn("⚠️ Element missing roughEle:", element);
+            return;
+          }
           roughCanvas.draw(element.roughEle);
           break;
 
         case TOOL_ITEMS.BRUSH: {
           context.fillStyle = element.stroke;
-
           const stroke = getStroke(element.points, {
             size: element.size,
             thinning: 0.6,
             smoothing: 0.5,
             streamline: 0.5,
           });
-
           const path = new Path2D(getSvgPathFromStroke(stroke));
           context.fill(path);
           break;
@@ -138,15 +138,9 @@ function Board({ id }) {
     });
   }, [elements]);
 
-  /* ---------------- TEXT TOOL FOCUS ---------------- */
-  useEffect(() => {
-    if (toolActionType === TOOL_ACTION_TYPES.WRITING) {
-      setTimeout(() => textAreaRef.current?.focus(), 0);
-    }
-  }, [toolActionType]);
-
   /* ---------------- MOUSE HANDLERS ---------------- */
   const handleMouseDown = (e) => {
+    console.log("🖱️ Mouse Down");
     if (!isAuthorized) return;
     boardMouseDownHandler(e, toolboxState);
   };
@@ -167,6 +161,14 @@ function Board({ id }) {
 
   return (
     <>
+      <canvas
+        ref={canvasRef}
+        id="canvas"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      />
+
       {toolActionType === TOOL_ACTION_TYPES.WRITING && elements.length > 0 && (
         <textarea
           ref={textAreaRef}
@@ -180,14 +182,6 @@ function Board({ id }) {
           onBlur={(e) => textAreaBlurHandler(e.target.value)}
         />
       )}
-
-      <canvas
-        ref={canvasRef}
-        id="canvas"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      />
     </>
   );
 }

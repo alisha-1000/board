@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import styles from "./index.module.css";
 import boardContext from "../../store/board-context";
+import { API_HOST } from "../../utils/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,28 +14,26 @@ const Login = () => {
   const navigate = useNavigate();
   const { setUserLoginStatus } = useContext(boardContext);
 
+  /* ---------- EMAIL LOGIN ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const res = await axios.post(
-        "https://board-1-lrt8.onrender.com/api/users/login",
+        `${API_HOST}/api/users/login`,
         { email, password }
       );
 
       const token = res.data.token;
-      console.log(token);
 
-      // 🔥 THESE 3 LINES ARE CRITICAL
-      localStorage.setItem("whiteboard_user_token", token);
+      // ✅ FIX: correct token key
+      localStorage.setItem("token", token);
 
       setUserLoginStatus(true);
 
-      // 🔥 FORCE SIDEBAR TO RE-READ TOKEN
-      window.location.href = "/"; 
-      // (simple + safe way)
-
+      // ✅ navigate instead of full reload
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }
@@ -45,7 +43,7 @@ const Login = () => {
   const handleGoogleLogin = async (credentialResponse) => {
     try {
       const res = await fetch(
-        "https://board-1-lrt8.onrender.com/api/users/google",
+        `${API_HOST}/api/users/google`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -62,12 +60,12 @@ const Login = () => {
         return;
       }
 
-      // ✅ SAVE TOKEN
-      localStorage.setItem("whiteboard_user_token", data.token);
+      // ✅ FIX: correct token key
+      localStorage.setItem("token", data.token);
+
       setUserLoginStatus(true);
 
-      // 🔥 FORCE FULL RELOAD
-      window.location.href = "/";
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Google login error:", err);
       setError("Google login failed");
@@ -111,8 +109,7 @@ const Login = () => {
       />
 
       <p style={{ marginTop: "16px" }}>
-        Don't have an account?{" "}
-        <Link to="/register">Register here</Link>
+        Don't have an account? <Link to="/register">Register here</Link>
       </p>
     </div>
   );

@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 // Create a new canvas
 exports.createCanvas = async (req, res) => {
     try {
-        const userId = req.userId; // Get the authenticated user ID
+        const userId = req.user.userId; // Get the authenticated user ID
 
         const newCanvas = new Canvas({
             owner: userId,
@@ -24,7 +24,7 @@ exports.createCanvas = async (req, res) => {
 exports.updateCanvas = async (req, res) => {
     try {
         const { canvasId, elements } = req.body;
-        const userId = req.userId;
+        const userId = req.user.userId;
         console.log("canvas id ", canvasId)
 
         const canvas = await Canvas.findById(canvasId);
@@ -52,7 +52,7 @@ exports.updateCanvas = async (req, res) => {
 exports.loadCanvas = async (req, res) => {
     try {
         const canvasId = req.params.id;
-        const userId = req.userId;
+        const userId = req.user.userId;
 
         const canvas = await Canvas.findById(canvasId);
         if (!canvas) {
@@ -73,9 +73,9 @@ exports.loadCanvas = async (req, res) => {
 
 exports.shareCanvas = async (req, res) => {
     try {
-        const { email } = req.body; 
+        const { email } = req.body;
         const canvasId = req.params.id;
-        const userId = req.userId; 
+        const userId = req.user.userId;
 
         // Find the user by email
         const userToShare = await User.findOne({ email });
@@ -122,7 +122,7 @@ exports.unshareCanvas = async (req, res) => {
     try {
         const { userIdToRemove } = req.body;
         const canvasId = req.params.id;
-        const userId = req.userId;
+        const userId = req.user.userId;
 
         const canvas = await Canvas.findById(canvasId);
         if (!canvas) {
@@ -145,7 +145,7 @@ exports.unshareCanvas = async (req, res) => {
 exports.deleteCanvas = async (req, res) => {
     try {
         const canvasId = req.params.id;
-        const userId = req.userId;
+        const userId = req.user.userId;
 
         const canvas = await Canvas.findById(canvasId);
         if (!canvas) {
@@ -165,7 +165,7 @@ exports.deleteCanvas = async (req, res) => {
 
 exports.getUserCanvases = async (req, res) => {
     try {
-        const userId = req.userId;
+        const userId = req.user.userId;
 
         const canvases = await Canvas.find({
             $or: [{ owner: userId }, { shared: userId }]

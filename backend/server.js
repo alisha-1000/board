@@ -22,6 +22,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "http://localhost:3001",
       "https://whiteboard-tutorial-eight.vercel.app",
     ],
     credentials: true,
@@ -47,14 +48,16 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:3000",
+      "http://localhost:3001",
       "https://whiteboard-tutorial-eight.vercel.app",
     ],
     methods: ["GET", "POST"],
   },
 });
 
-/* ---------------- IN-MEMORY CANVAS CACHE ---------------- */
-const canvasData = {};
+/* ---------------- IN-MEMORY CANVAS CACHE REMOVED ---------------- */
+// const canvasData = {}; // ❌ Removed to prevent memory leak
+
 
 io.on("connection", (socket) => {
   console.log("🔌 User connected:", socket.id);
@@ -89,8 +92,7 @@ io.on("connection", (socket) => {
 
       socket.join(canvasId);
 
-      const elementsToSend =
-        canvasData[canvasId] || canvas.elements || [];
+      const elementsToSend = canvas.elements || [];
 
       socket.emit("loadCanvas", elementsToSend);
 
@@ -104,7 +106,8 @@ io.on("connection", (socket) => {
   /* -------- DRAW UPDATE -------- */
   socket.on("drawingUpdate", async ({ canvasId, elements }) => {
     try {
-      canvasData[canvasId] = elements;
+      // canvasData[canvasId] = elements; // ❌ Removed
+
 
       socket.to(canvasId).emit("receiveDrawingUpdate", elements);
 

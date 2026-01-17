@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
+      lowercase: true,
     },
 
     // ❗ Password is optional now (OAuth users won't have it)

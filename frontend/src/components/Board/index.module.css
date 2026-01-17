@@ -1,5 +1,6 @@
 .textElementBox {
   position: fixed;
+  z-index: 60;
   border: none;
   background: transparent;
   resize: none;

@@ -1,8 +1,9 @@
 import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import styles from "./index.module.css";
 import boardContext from "../../store/board-context";
+import { API_HOST } from "../../utils/api";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
   const { setUserLoginStatus } = useContext(boardContext);
 
   /* ---------- EMAIL / PASSWORD REGISTER ---------- */
@@ -24,7 +26,7 @@ const Register = () => {
 
     try {
       const response = await fetch(
-        "https://board-1-lrt8.onrender.com/api/users/register",
+        `${API_HOST}/api/users/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -39,12 +41,13 @@ const Register = () => {
         return;
       }
 
-      // ✅ SAVE TOKEN
-      localStorage.setItem("whiteboard_user_token", data.token);
+      // ✅ FIX: correct token key
+      localStorage.setItem("token", data.token);
+
       setUserLoginStatus(true);
 
-      // 🔥 FORCE FULL RELOAD (VERY IMPORTANT)
-      window.location.href = "/";
+      // ✅ navigate instead of reload
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
       setError("Something went wrong. Please try again.");
@@ -55,7 +58,7 @@ const Register = () => {
   const handleGoogleRegister = async (credentialResponse) => {
     try {
       const res = await fetch(
-        "https://board-1-lrt8.onrender.com/api/users/google",
+        `${API_HOST}/api/users/google`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -72,12 +75,12 @@ const Register = () => {
         return;
       }
 
-      // ✅ SAVE TOKEN
-      localStorage.setItem("whiteboard_user_token", data.token);
+      // ✅ FIX: correct token key
+      localStorage.setItem("token", data.token);
+
       setUserLoginStatus(true);
 
-      // 🔥 FORCE FULL RELOAD
-      window.location.href = "/";
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Google register error:", err);
       setError("Google signup failed");
@@ -129,8 +132,7 @@ const Register = () => {
       />
 
       <p style={{ marginTop: "16px" }}>
-        Already have an account?{" "}
-        <Link to="/login">Login here</Link>
+        Already have an account? <Link to="/login">Login here</Link>
       </p>
     </div>
   );

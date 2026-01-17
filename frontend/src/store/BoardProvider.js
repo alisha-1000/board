@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useMemo, useCallback } from "react";
 import boardContext from "./board-context";
 import { BOARD_ACTIONS, TOOL_ACTION_TYPES, TOOL_ITEMS } from "../constants";
 import { createElement, isPointNearElement } from "../utils/element";
@@ -8,6 +8,7 @@ import { createElement, isPointNearElement } from "../utils/element";
 const boardReducer = (state, action) => {
   switch (action.type) {
     case BOARD_ACTIONS.CHANGE_TOOL:
+      console.log("Reducer: CHANGE_TOOL", action.payload.tool);
       return { ...state, activeToolItem: action.payload.tool };
 
     case BOARD_ACTIONS.CHANGE_ACTION_TYPE:
@@ -158,15 +159,26 @@ const BoardProvider = ({ children }) => {
 
   /* ---------- TOOL HANDLERS ---------- */
 
-  const changeToolHandler = (tool) =>
-    dispatch({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: { tool } });
 
-  const boardMouseDownHandler = (e, toolboxState) => {
-    if (state.toolActionType === TOOL_ACTION_TYPES.WRITING) return;
+  /* ---------- STATE REF (Fixes Stale Closures + Performance) ---------- */
+  const stateRef = React.useRef(state);
+  React.useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  /* ---------- TOOL HANDLERS ---------- */
+
+  const changeToolHandler = useCallback((tool) => {
+    dispatch({ type: BOARD_ACTIONS.CHANGE_TOOL, payload: { tool } });
+  }, []);
+
+  const boardMouseDownHandler = useCallback((e, toolboxState) => {
+    const currentState = stateRef.current;
+    if (currentState.toolActionType === TOOL_ACTION_TYPES.WRITING) return;
 
     const { clientX, clientY } = e;
 
-    if (state.activeToolItem === TOOL_ITEMS.ERASER) {
+    if (currentState.activeToolItem === TOOL_ITEMS.ERASER) {
       dispatch({
         type: BOARD_ACTIONS.CHANGE_ACTION_TYPE,
         payload: { actionType: TOOL_ACTION_TYPES.ERASING },
@@ -179,31 +191,33 @@ const BoardProvider = ({ children }) => {
       payload: {
         clientX,
         clientY,
-        stroke: toolboxState[state.activeToolItem]?.stroke,
-        fill: toolboxState[state.activeToolItem]?.fill,
-        size: toolboxState[state.activeToolItem]?.size,
+        stroke: toolboxState[currentState.activeToolItem]?.stroke,
+        fill: toolboxState[currentState.activeToolItem]?.fill,
+        size: toolboxState[currentState.activeToolItem]?.size,
       },
     });
-  };
+  }, []);
 
-  const boardMouseMoveHandler = (e) => {
+  const boardMouseMoveHandler = useCallback((e) => {
+    const currentState = stateRef.current;
     if (
-      state.toolActionType !== TOOL_ACTION_TYPES.DRAWING &&
-      state.toolActionType !== TOOL_ACTION_TYPES.ERASING
+      currentState.toolActionType !== TOOL_ACTION_TYPES.DRAWING &&
+      currentState.toolActionType !== TOOL_ACTION_TYPES.ERASING
     )
       return;
 
     dispatch({
       type:
-        state.toolActionType === TOOL_ACTION_TYPES.ERASING
+        currentState.toolActionType === TOOL_ACTION_TYPES.ERASING
           ? BOARD_ACTIONS.ERASE
           : BOARD_ACTIONS.DRAW_MOVE,
       payload: { clientX: e.clientX, clientY: e.clientY },
     });
-  };
+  }, []);
 
-  const boardMouseUpHandler = () => {
-    if (state.toolActionType === TOOL_ACTION_TYPES.DRAWING) {
+  const boardMouseUpHandler = useCallback(() => {
+    const currentState = stateRef.current;
+    if (currentState.toolActionType === TOOL_ACTION_TYPES.DRAWING) {
       dispatch({ type: BOARD_ACTIONS.DRAW_UP });
     }
 
@@ -211,26 +225,47 @@ const BoardProvider = ({ children }) => {
       type: BOARD_ACTIONS.CHANGE_ACTION_TYPE,
       payload: { actionType: TOOL_ACTION_TYPES.NONE },
     });
-  };
+  }, []);
 
-  /* ---------- TEXTAREA BLUR HANDLER (FIX) ---------- */
+  /* ---------- TEXTAREA BLUR HANDLER (FIXED) ---------- */
 
-  const textAreaBlurHandler = (e) => {
-  const value = e?.target?.value;
+  const textAreaBlurHandler = useCallback((text) => {
+    const currentState = stateRef.current;
+    if (text === undefined || text === null) return;
+    if (currentState.elements.length === 0) return;
 
-  if (value === undefined) return;
-  if (state.elements.length === 0) return;
+    dispatch({
+      type: BOARD_ACTIONS.CHANGE_TEXT,
+      payload: { text },
+    });
+  }, []);
 
-  dispatch({
-    type: BOARD_ACTIONS.CHANGE_TEXT,
-    payload: { text: value },
-  });
-};
+  /* ---------- STABLE DISPATCH ACTIONS ---------- */
 
+  const undo = useCallback(() => dispatch({ type: BOARD_ACTIONS.UNDO }), []);
+  const redo = useCallback(() => dispatch({ type: BOARD_ACTIONS.REDO }), []);
+
+  const setCanvasId = useCallback((canvasId) =>
+    dispatch({
+      type: BOARD_ACTIONS.SET_CANVAS_ID,
+      payload: { canvasId },
+    }), []);
+
+  const setElements = useCallback((elements) =>
+    dispatch({
+      type: BOARD_ACTIONS.SET_CANVAS_ELEMENTS,
+      payload: { elements },
+    }), []);
+
+  const setUserLoginStatus = useCallback((isUserLoggedIn) =>
+    dispatch({
+      type: BOARD_ACTIONS.SET_USER_LOGIN_STATUS,
+      payload: { isUserLoggedIn },
+    }), []);
 
   /* ---------- CONTEXT VALUE ---------- */
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     activeToolItem: state.activeToolItem,
     elements: state.elements,
     toolActionType: state.toolActionType,
@@ -241,29 +276,30 @@ const BoardProvider = ({ children }) => {
     boardMouseDownHandler,
     boardMouseMoveHandler,
     boardMouseUpHandler,
-    textAreaBlurHandler, // ✅ IMPORTANT
+    textAreaBlurHandler,
 
-    undo: () => dispatch({ type: BOARD_ACTIONS.UNDO }),
-    redo: () => dispatch({ type: BOARD_ACTIONS.REDO }),
-
-    setCanvasId: (canvasId) =>
-      dispatch({
-        type: BOARD_ACTIONS.SET_CANVAS_ID,
-        payload: { canvasId },
-      }),
-
-    setElements: (elements) =>
-      dispatch({
-        type: BOARD_ACTIONS.SET_CANVAS_ELEMENTS,
-        payload: { elements },
-      }),
-
-    setUserLoginStatus: (isUserLoggedIn) =>
-      dispatch({
-        type: BOARD_ACTIONS.SET_USER_LOGIN_STATUS,
-        payload: { isUserLoggedIn },
-      }),
-  };
+    undo,
+    redo,
+    setCanvasId,
+    setElements,
+    setUserLoginStatus,
+  }), [
+    state.activeToolItem,
+    state.elements,
+    state.toolActionType,
+    state.canvasId,
+    state.isUserLoggedIn,
+    changeToolHandler,
+    boardMouseDownHandler,
+    boardMouseMoveHandler,
+    boardMouseUpHandler,
+    textAreaBlurHandler,
+    undo,
+    redo,
+    setCanvasId,
+    setElements,
+    setUserLoginStatus
+  ]);
 
   return (
     <boardContext.Provider value={contextValue}>

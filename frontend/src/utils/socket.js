@@ -1,9 +1,10 @@
 import { io } from "socket.io-client";
+import { API_HOST } from "./api";
 
 let socket = null;
 
 export const connectSocket = () => {
-  const token = localStorage.getItem("whiteboard_user_token");
+  const token = localStorage.getItem("token");
 
   // 🔥 Prevent duplicate connections
   if (socket) {
@@ -11,7 +12,7 @@ export const connectSocket = () => {
     socket = null;
   }
 
-  socket = io("https://board-1-lrt8.onrender.com", {
+  socket = io(API_HOST, {
     auth: {
       token: token ? `Bearer ${token}` : null,
     },

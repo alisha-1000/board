@@ -3,6 +3,7 @@ import axios from "axios";
 import "./index.min.css";
 import { useNavigate, useParams } from "react-router-dom";
 import boardContext from "../../store/board-context";
+import { API_HOST } from "../../utils/api";
 
 const Sidebar = () => {
   const [canvases, setCanvases] = useState([]);
@@ -12,7 +13,7 @@ const Sidebar = () => {
 
   // ✅ TOKEN AS STATE (IMPORTANT)
   const [token, setToken] = useState(
-    localStorage.getItem("whiteboard_user_token")
+    localStorage.getItem("token")
   );
 
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const Sidebar = () => {
 
     try {
       const response = await axios.post(
-        "https://board-1-lrt8.onrender.com/api/canvas/create",
+        `${API_HOST}/api/canvas/create`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -63,7 +64,7 @@ const Sidebar = () => {
 
     try {
       const response = await axios.get(
-        "https://board-1-lrt8.onrender.com/api/canvas/list",
+        `${API_HOST}/api/canvas/list`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -94,7 +95,7 @@ const Sidebar = () => {
 
     try {
       await axios.delete(
-        `https://board-1-lrt8.onrender.com/api/canvas/delete/${deleteId}`,
+        `${API_HOST}/api/canvas/delete/${deleteId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -144,7 +145,7 @@ const Sidebar = () => {
 
   /* ---------------- AUTH ---------------- */
   const handleLogout = () => {
-    localStorage.removeItem("whiteboard_user_token");
+    localStorage.removeItem("token");
     setToken(null);
     setUserLoginStatus(false);
     setCanvases([]);
@@ -169,9 +170,8 @@ const Sidebar = () => {
         {canvases.map((canvas) => (
           <li
             key={canvas._id}
-            className={`canvas-item ${
-              canvas._id === canvasId ? "selected" : ""
-            }`}
+            className={`canvas-item ${canvas._id === canvasId ? "selected" : ""
+              }`}
           >
             <span
               className="canvas-name"

@@ -1,13 +1,19 @@
 // utils/api.js
 import axios from "axios";
 
-const API_BASE_URL =
-  "https://board-1-lrt8.onrender.com/api/canvas";
+// Allow overriding via env var, otherwise default to local backend for development
+// Allow overriding via env var, otherwise default to local backend for development
+// ⚡️ FIX: Use 127.0.0.1 instead of localhost to avoid IPv6 lookup delay on macOS
+export const API_HOST =
+  process.env.REACT_APP_API_BASE_URL?.replace(/\/+$/, "") ||
+  "http://127.0.0.1:5001";
+
+const API_BASE_URL = `${API_HOST}/api/canvas`;
 
 /* ---------------- HELPERS ---------------- */
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("whiteboard_user_token");
+  const token = localStorage.getItem("token"); // ✅ CORRECT
   return token
     ? { Authorization: `Bearer ${token}` }
     : {};
@@ -22,7 +28,6 @@ export const updateCanvas = async (canvasId, elements) => {
       { canvasId, elements },
       { headers: getAuthHeaders() }
     );
-
     return response.data;
   } catch (error) {
     console.error("❌ Error updating canvas:", error);
@@ -36,7 +41,6 @@ export const fetchInitialCanvasElements = async (canvasId) => {
       `${API_BASE_URL}/load/${canvasId}`,
       { headers: getAuthHeaders() }
     );
-
     return response.data.elements;
   } catch (error) {
     console.error("❌ Error fetching canvas elements:", error);
