@@ -58,8 +58,10 @@ function HomePage() {
 /* -------- App -------- */
 
 function App() {
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com";
+
   return (
-    <GoogleOAuthProvider clientId="727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={googleClientId}>
       <BoardProvider>
         <Router>
           <Routes>

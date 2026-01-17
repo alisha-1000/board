@@ -42,23 +42,23 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
+    console.log(user,email);
     // user nahi mila ya password hi nahi hai
     if (!user || !user.password) {
       return res.status(400).json({
-        message: "Invalid credentials",
+        message: "Invalid credentials1",
       });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({
-        message: "Invalid credentials",
+        message: "Invalid credentials2",
       });
     }
 
     const token = jwt.sign(
-      { userId: user._id },
+      { email: user.email },
       SECRET_KEY,
       { expiresIn: "7d" }
     );
@@ -66,6 +66,7 @@ const loginUser = async (req, res) => {
     res.json({ token });
   } catch (err) {
     res.status(500).json({ message: "Login failed" });
+    console.log(err);
   }
 };
 

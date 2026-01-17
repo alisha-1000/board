@@ -56,7 +56,7 @@ function Board({ id }) {
     };
 
     const handleUnauthorized = () => {
-      alert("Access Denied: You cannot edit this canvas.");
+      // alert("Access Denied: You cannot edit this canvas.");
       setIsAuthorized(false);
     };
 

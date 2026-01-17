@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema(
     // ❗ Password is optional now (OAuth users won't have it)
     password: {
       type: String,
-      required: false,
     },
 
     // 🔐 Auth provider
@@ -32,12 +31,12 @@ const userSchema = new mongoose.Schema(
 
 /* ---------- HASH PASSWORD ---------- */
 userSchema.pre("save", async function (next) {
-  // If no password (OAuth user) OR not modified → skip
+  // OAuth user OR password unchanged → skip
   if (!this.password || !this.isModified("password")) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // bcrypt automatically generates salt
+    this.password = await bcrypt.hash(this.password, 10);
     next();
   } catch (error) {
     next(error);
@@ -48,6 +47,8 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = async function (enteredPassword) {
   // OAuth users don't have passwords
   if (!this.password) return false;
+
+  // compare plain password with stored hash
   return bcrypt.compare(enteredPassword, this.password);
 };
 
