@@ -56,7 +56,6 @@ function Board({ id }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState(null); // { x, y }
   const [presence, setPresence] = useState([]); // List of { userId, email, socketId }
-  const [cursors, setCursors] = useState({}); // { socketId: { x, y, email } }
   const [chatMessages, setChatMessages] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -140,19 +139,7 @@ function Board({ id }) {
       setPresence(users);
     };
 
-    const handleCursorUpdate = (cursor) => {
-      setCursors((prev) => ({
-        ...prev,
-        [cursor.socketId]: { x: cursor.x, y: cursor.y, email: cursor.email || "Guest" },
-      }));
-    };
-
     const handleCursorRemove = ({ socketId }) => {
-      setCursors((prev) => {
-        const newCursors = { ...prev };
-        delete newCursors[socketId];
-        return newCursors;
-      });
     };
 
     socket.on("receiveDrawingUpdate", handleReceive);
@@ -162,8 +149,6 @@ function Board({ id }) {
     socket.on("sharingUpdate", handleSharingUpdate);
     socket.on("canvasShared", handleCanvasShared);
     socket.on("presenceUpdate", handlePresenceUpdate);
-    socket.on("cursorUpdate", handleCursorUpdate);
-    socket.on("cursorRemove", handleCursorRemove);
     socket.on("notification", handleNotification);
     socket.on("unauthorized", handleUnauthorized);
 
@@ -175,8 +160,6 @@ function Board({ id }) {
       socket.off("sharingUpdate", handleSharingUpdate);
       socket.off("canvasShared", handleCanvasShared);
       socket.off("presenceUpdate", handlePresenceUpdate);
-      socket.off("cursorUpdate", handleCursorUpdate);
-      socket.off("cursorRemove", handleCursorRemove);
       socket.off("notification", handleNotification);
       socket.off("unauthorized", handleUnauthorized);
     };
@@ -305,16 +288,6 @@ function Board({ id }) {
     // 🚀 Real-time Live Drawing Move Updates
     const now = Date.now();
     if (socket && now - lastEmitTime.current > 30) {
-      // 🖱️ Emit Cursor Position (Throttled to ~33fps)
-      socket.emit("cursorMove", {
-        canvasId: id,
-        cursor: {
-          x: e.clientX,
-          y: e.clientY,
-          email: currentUser?.email,
-          userId: currentUser?._id
-        }
-      });
       lastEmitTime.current = now;
     }
   };
@@ -381,10 +354,6 @@ function Board({ id }) {
           </div>
         </div>
 
-        <div className={classes.sharedList} title="Users with access">
-          👤 {sharedEmails.length > 0 ? sharedEmails.join(", ") : "Private"}
-        </div>
-
         <div className={classes.badgeRow}>
           {presence.map((user) => (
             <div
@@ -400,43 +369,6 @@ function Board({ id }) {
           ))}
         </div>
       </section>
-
-      {/* 🖱️ LIVE CURSORS */}
-      {Object.entries(cursors).map(([socketId, cursor]) => {
-        const userColor = getUserColor(cursor.email);
-
-        return (
-          <div
-            key={socketId}
-            className={classes.remoteCursor}
-            style={{
-              transform: `translate(${cursor.x}px, ${cursor.y}px)`,
-            }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className={classes.cursorIcon}
-            >
-              <path
-                d="M5.65376 12.3822L15.3026 21.1477C16.1046 21.876 17.3928 21.1345 17.1505 20.0701L14.4731 8.30712C14.4214 8.01046 14.2188 7.76504 13.9351 7.65333L6.10628 4.24072C5.32831 3.9641 4.51733 4.7731 4.88768 5.61712L8.76106 14.5029C8.87764 14.7724 8.85 15.0818 8.68535 15.3263L5.00015 20.7303C0.00015 25.7303 10.0002 20.7303 5.00015 20.7303Z"
-                fill={userColor}
-                stroke="white"
-                strokeWidth="1.5"
-              />
-            </svg>
-            <div
-              className={classes.cursorLabel}
-              style={{ backgroundColor: userColor }}
-            >
-              {cursor.email?.split("@")[0] || "Guest"}
-            </div>
-          </div>
-        );
-      })}
 
       {toolActionType === TOOL_ACTION_TYPES.WRITING && elements.length > 0 && (
         <textarea
