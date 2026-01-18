@@ -24,6 +24,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "https://whiteboard-tutorial-eight.vercel.app",
+      "https://whiteboard-rosy-nu.vercel.app",
     ],
     credentials: true,
   })
@@ -50,6 +51,7 @@ const io = new Server(server, {
       "http://localhost:3000",
       "http://localhost:3001",
       "https://whiteboard-tutorial-eight.vercel.app",
+      "https://whiteboard-rosy-nu.vercel.app",
     ],
     methods: ["GET", "POST"],
   },
