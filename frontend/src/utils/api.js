@@ -13,7 +13,7 @@ const API_BASE_URL = `${API_HOST}/api/canvas`;
 /* ---------------- HELPERS ---------------- */
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token"); // ✅ CORRECT
+  const token = localStorage.getItem("token"); // CORRECT
   return token
     ? { Authorization: `Bearer ${token}` }
     : {};
@@ -30,7 +30,7 @@ export const updateCanvas = async (canvasId, elements) => {
     );
     return response.data;
   } catch (error) {
-    console.error("❌ Error updating canvas:", error);
+    console.error(" Error updating canvas:", error);
     throw error;
   }
 };
@@ -43,7 +43,7 @@ export const fetchInitialCanvasElements = async (canvasId) => {
     );
     return response.data.elements;
   } catch (error) {
-    console.error("❌ Error fetching canvas elements:", error);
+    console.error("Error fetching canvas elements:", error);
     throw error;
   }
 };

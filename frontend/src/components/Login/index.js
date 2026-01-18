@@ -14,7 +14,7 @@ const Login = () => {
   /* ---------- 127.0.0.1 REDIRECT FIX ---------- */
   useEffect(() => {
     if (window.location.hostname === "127.0.0.1") {
-      // 🔄 Auto-redirect to localhost to fix Google Auth 403 error
+      // Auto-redirect to localhost to fix Google Auth 403 error
       const newUrl = window.location.href.replace("127.0.0.1", "localhost");
       window.location.href = newUrl;
     }
@@ -36,12 +36,12 @@ const Login = () => {
 
       const token = res.data.token;
 
-      // ✅ FIX: correct token key
+      //  FIX: correct token key
       localStorage.setItem("token", token);
 
       setUserLoginStatus(true);
 
-      // ✅ navigate instead of full reload
+      //  navigate instead of full reload
       navigate("/", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
@@ -69,7 +69,7 @@ const Login = () => {
         return;
       }
 
-      // ✅ FIX: correct token key
+      //  FIX: correct token key
       localStorage.setItem("token", data.token);
 
       setUserLoginStatus(true);

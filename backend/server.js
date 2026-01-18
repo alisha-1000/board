@@ -115,7 +115,7 @@ io.on("connection", (socket) => {
         type: "success"
       });
     } catch (error) {
-      console.error("❌ Socket auth error:", error.message);
+      console.error(" Socket auth error:", error.message);
       socket.emit("unauthorized", { message: "Invalid token" });
     }
   });
@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
     try {
       await Canvas.findByIdAndUpdate(canvasId, { elements });
     } catch (error) {
-      console.error("❌ Save canvas error:", error);
+      console.error("Save canvas error:", error);
     }
   });
 
@@ -153,7 +153,7 @@ io.on("connection", (socket) => {
 
       io.to(canvasId).emit("newComment", addedComment);
     } catch (error) {
-      console.error("❌ Add comment error:", error);
+      console.error(" Add comment error:", error);
     }
   });
 
@@ -183,7 +183,7 @@ io.on("connection", (socket) => {
       const savedMessage = updatedCanvas.messages[updatedCanvas.messages.length - 1];
       io.to(canvasId).emit("newMessage", savedMessage);
     } catch (error) {
-      console.error("❌ Send message error:", error);
+      console.error("Send message error:", error);
     }
   });
 

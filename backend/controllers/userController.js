@@ -72,7 +72,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 🟢 Specific error for Google users trying password login
+    // Specific error for Google users trying password login
     if (!user.password || user.provider === "google") {
       return res.status(400).json({
         message: "Account created with Google. Please use Google Login.",

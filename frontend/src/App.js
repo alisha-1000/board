@@ -22,7 +22,7 @@ import { disconnectSocket } from "./utils/socket";
 /* ---------------- PROTECTED ROUTE ---------------- */
 
 const ProtectedRoute = ({ children }) => {
-  // ✅ FIX: correct token key
+  // FIX: correct token key
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -38,7 +38,7 @@ const ProtectedRoute = ({ children }) => {
 function HomePage() {
   const { id } = useParams();
 
-  // ✅ Socket managed via BoardProvider (Context)
+  // Socket managed via BoardProvider (Context)
   useEffect(() => {
     // connectSocket(); // Handled by BoardProvider
     // return () => disconnectSocket();

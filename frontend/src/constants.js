@@ -77,7 +77,7 @@ export const STROKE_TOOL_TYPES = [
 ];
 
 export const SIZE_TOOL_TYPES = [
-  TOOL_ITEMS.BRUSH,     // ✅ added
+  TOOL_ITEMS.BRUSH,     // added
   TOOL_ITEMS.LINE,
   TOOL_ITEMS.ARROW,
   TOOL_ITEMS.RECTANGLE,

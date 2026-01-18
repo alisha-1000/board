@@ -22,7 +22,7 @@ const Toolbar = () => {
 
   const handleDownloadClick = () => {
     const canvas = document.getElementById("canvas");
-    if (!canvas) return; // ✅ safety check
+    if (!canvas) return; // safety check
 
     const data = canvas.toDataURL("image/png");
     const anchor = document.createElement("a");

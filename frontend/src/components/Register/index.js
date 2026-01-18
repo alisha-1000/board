@@ -49,12 +49,12 @@ const Register = () => {
         return;
       }
 
-      // ✅ FIX: correct token key
+      // FIX: correct token key
       localStorage.setItem("token", data.token);
 
       setUserLoginStatus(true);
 
-      // ✅ navigate instead of reload
+      // navigate instead of reload
       navigate("/", { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
@@ -83,7 +83,7 @@ const Register = () => {
         return;
       }
 
-      // ✅ FIX: correct token key
+      //  FIX: correct token key
       localStorage.setItem("token", data.token);
 
       setUserLoginStatus(true);

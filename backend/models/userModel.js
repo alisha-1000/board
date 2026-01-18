@@ -11,19 +11,19 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    // ❗ Password is optional now (OAuth users won't have it)
+    //Password is optional now (OAuth users won't have it)
     password: {
       type: String,
     },
 
-    // 🔐 Auth provider
+    //Auth provider
     provider: {
       type: String,
       enum: ["local", "google"],
       default: "local",
     },
 
-    // 🟢 Google specific ID
+    //  Google specific ID
     googleId: {
       type: String,
     },

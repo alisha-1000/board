@@ -123,10 +123,10 @@ exports.shareCanvas = async (req, res) => {
         const updatedCanvas = await Canvas.findById(canvasId).populate("shared", "email");
         const sharedEmails = updatedCanvas.shared.map(u => u.email);
 
-        // 🚀 Real-time Notification
+        // Real-time Notification
         const io = req.app.get("socketio");
         if (io) {
-            // 🔥 Global broadcast for the sidebar notification
+            // Global broadcast for the sidebar notification
             io.emit("canvasShared", { userId: userToShare._id });
             // Room specific update for immediate UI sync
             io.to(canvasId).emit("sharingUpdate", { sharedEmails });

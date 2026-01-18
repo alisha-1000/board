@@ -21,7 +21,7 @@ const googleAuth = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    // 🟢 FIRST TIME GOOGLE USER
+    // FIRST TIME GOOGLE USER
     if (!user) {
       user = await User.create({
         email,
@@ -29,7 +29,7 @@ const googleAuth = async (req, res) => {
         provider: "google",
       });
     }
-    // 🟢 USER EXISTS (local or google) → just link googleId
+    //  USER EXISTS (local or google) → just link googleId
     else {
       user.googleId = googleId;
       await user.save();
