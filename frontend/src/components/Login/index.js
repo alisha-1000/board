@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { FiMail, FiLock, FiStar, FiMessageSquare, FiPenTool } from "react-icons/fi";
 import styles from "./index.module.css";
 import boardContext from "../../store/board-context";
 import { API_HOST } from "../../utils/api";
@@ -98,15 +99,15 @@ const Login = () => {
           </p>
           <div className={styles.features}>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>✨</span>
+              <span className={styles.featureIcon}><FiStar /></span>
               <span>Real-time collaboration</span>
             </div>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>💬</span>
+              <span className={styles.featureIcon}><FiMessageSquare /></span>
               <span>Live chat & comments</span>
             </div>
             <div className={styles.feature}>
-              <span className={styles.featureIcon}>🎨</span>
+              <span className={styles.featureIcon}><FiPenTool /></span>
               <span>Powerful drawing tools</span>
             </div>
           </div>
@@ -115,24 +116,35 @@ const Login = () => {
         {/* Login Form Section */}
         <div className={styles.formSection}>
           <h2 className={styles.formTitle}>Sign In</h2>
+          <p className={styles.formSubtitle}>Welcome back!</p>
 
           {/* Email Login */}
           <form onSubmit={handleSubmit} className={styles.loginForm}>
-            <input
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className={styles.inputGroup}>
+              <input
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <span className={styles.inputIcon}>
+                <FiMail />
+              </span>
+            </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className={styles.inputGroup}>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <span className={styles.inputIcon}>
+                <FiLock />
+              </span>
+            </div>
 
             <button type="submit" className={styles.submitButton}>Sign In</button>
           </form>
