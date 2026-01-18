@@ -16,3 +16,156 @@
   line-height: inherit;
   font-family: "Caveat";
 }
+
+.dashboard {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.presenceContainer {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.presenceRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.presenceRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.savingIndicator {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  backdrop-filter: blur(5px);
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sharedList {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #2c3e50;
+  font-weight: 500;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.badgeRow {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  pointer-events: auto;
+}
+
+.userBadge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  border: 2.5px solid white;
+  cursor: help;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.userBadge:hover {
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.userBadge::after {
+  content: attr(data-email);
+  position: absolute;
+  bottom: -35px;
+  left: 0;
+  background: #2c3e50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+  pointer-events: none;
+  font-weight: 500;
+  z-index: 1001;
+}
+
+.userBadge:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.userBadge:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 🖱️ REMOTE CURSORS */
+.remoteCursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1001;
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+.cursorIcon {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+}
+
+.cursorLabel {
+  position: absolute;
+  top: 18px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid white;
+  letter-spacing: -0.2px;
+}

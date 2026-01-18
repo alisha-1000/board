@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
     console.timeEnd("UserCreate");
 
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, email: user.email },
       SECRET_KEY,
       { expiresIn: "7d" }
     );
@@ -87,7 +87,7 @@ const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, email: user.email },
       SECRET_KEY,
       { expiresIn: "7d" }
     );

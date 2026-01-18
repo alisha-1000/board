@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import styles from "./index.module.css";
@@ -10,6 +10,14 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+
+  /* ---------- 127.0.0.1 REDIRECT FIX ---------- */
+  useEffect(() => {
+    if (window.location.hostname === "127.0.0.1") {
+      const newUrl = window.location.href.replace("127.0.0.1", "localhost");
+      window.location.href = newUrl;
+    }
+  }, []);
 
   const navigate = useNavigate();
   const { setUserLoginStatus } = useContext(boardContext);

@@ -8,6 +8,7 @@ export const TOOL_ITEMS = Object.freeze({
   ARROW: "ARROW",
   ERASER: "ERASER",
   TEXT: "TEXT",
+  COMMENT: "COMMENT",
 });
 
 /* ---------------- TOOL ACTION TYPES ---------------- */
@@ -36,6 +37,7 @@ export const BOARD_ACTIONS = Object.freeze({
   SET_CANVAS_ELEMENTS: "SET_CANVAS_ELEMENTS",
   SET_HISTORY: "SET_HISTORY",
   SET_USER_LOGIN_STATUS: "SET_USER_LOGIN_STATUS",
+  SET_USER: "SET_USER",
 });
 
 /* ---------------- COLORS ---------------- */

@@ -129,11 +129,26 @@ const boardReducer = (state, action) => {
         index: 0,
       };
 
+    case "SET_REMOTE_ELEMENTS":
+      return {
+        ...state,
+        elements: action.payload.elements,
+      };
+
     case BOARD_ACTIONS.SET_CANVAS_ID:
       return { ...state, canvasId: action.payload.canvasId };
 
     case BOARD_ACTIONS.SET_USER_LOGIN_STATUS:
       return { ...state, isUserLoggedIn: action.payload.isUserLoggedIn };
+
+    case BOARD_ACTIONS.SET_USER:
+      return { ...state, currentUser: action.payload.user };
+
+    case "SET_SHARED_EMAILS":
+      return { ...state, sharedEmails: action.payload.emails };
+
+    case "SET_SOCKET":
+      return { ...state, socket: action.payload };
 
     default:
       return state;
@@ -149,7 +164,10 @@ const initialBoardState = {
   history: [[]],
   index: 0,
   canvasId: "",
-  isUserLoggedIn: !!localStorage.getItem("whiteboard_user_token"),
+  isUserLoggedIn: !!localStorage.getItem("token"),
+  currentUser: null,
+  sharedEmails: [],
+  socket: null,
 };
 
 /* ---------------- PROVIDER ---------------- */
@@ -165,6 +183,25 @@ const BoardProvider = ({ children }) => {
   React.useEffect(() => {
     stateRef.current = state;
   }, [state]);
+
+  /* ---------- SOCKET MANAGEMENT ---------- */
+  React.useEffect(() => {
+    const { connectSocket, disconnectSocket } = require("../utils/socket");
+    let currentSocket = null;
+
+    if (state.isUserLoggedIn) {
+      currentSocket = connectSocket();
+      dispatch({ type: "SET_SOCKET", payload: currentSocket });
+    } else {
+      disconnectSocket();
+      dispatch({ type: "SET_SOCKET", payload: null });
+    }
+
+    return () => {
+      // Clean up on unmount or if login status changes significantly
+      // disconnectSocket(); // Removed because we want to keep it alive during navigation
+    };
+  }, [state.isUserLoggedIn]);
 
   /* ---------- TOOL HANDLERS ---------- */
 
@@ -217,6 +254,8 @@ const BoardProvider = ({ children }) => {
 
   const boardMouseUpHandler = useCallback(() => {
     const currentState = stateRef.current;
+    if (currentState.toolActionType === TOOL_ACTION_TYPES.WRITING) return;
+
     if (currentState.toolActionType === TOOL_ACTION_TYPES.DRAWING) {
       dispatch({ type: BOARD_ACTIONS.DRAW_UP });
     }
@@ -257,10 +296,28 @@ const BoardProvider = ({ children }) => {
       payload: { elements },
     }), []);
 
+  const setRemoteElements = useCallback((elements) =>
+    dispatch({
+      type: "SET_REMOTE_ELEMENTS",
+      payload: { elements },
+    }), []);
+
   const setUserLoginStatus = useCallback((isUserLoggedIn) =>
     dispatch({
       type: BOARD_ACTIONS.SET_USER_LOGIN_STATUS,
       payload: { isUserLoggedIn },
+    }), []);
+
+  const setCurrentUser = useCallback((user) =>
+    dispatch({
+      type: BOARD_ACTIONS.SET_USER,
+      payload: { user },
+    }), []);
+
+  const setSharedEmails = useCallback((emails) =>
+    dispatch({
+      type: "SET_SHARED_EMAILS",
+      payload: { emails },
     }), []);
 
   /* ---------- CONTEXT VALUE ---------- */
@@ -271,6 +328,9 @@ const BoardProvider = ({ children }) => {
     toolActionType: state.toolActionType,
     canvasId: state.canvasId,
     isUserLoggedIn: state.isUserLoggedIn,
+    currentUser: state.currentUser,
+    sharedEmails: state.sharedEmails,
+    socket: state.socket,
 
     changeToolHandler,
     boardMouseDownHandler,
@@ -282,13 +342,19 @@ const BoardProvider = ({ children }) => {
     redo,
     setCanvasId,
     setElements,
+    setRemoteElements,
     setUserLoginStatus,
+    setCurrentUser,
+    setSharedEmails,
   }), [
     state.activeToolItem,
     state.elements,
     state.toolActionType,
     state.canvasId,
     state.isUserLoggedIn,
+    state.currentUser,
+    state.sharedEmails,
+    state.socket,
     changeToolHandler,
     boardMouseDownHandler,
     boardMouseMoveHandler,
@@ -298,7 +364,10 @@ const BoardProvider = ({ children }) => {
     redo,
     setCanvasId,
     setElements,
-    setUserLoginStatus
+    setRemoteElements,
+    setUserLoginStatus,
+    setCurrentUser,
+    setSharedEmails
   ]);
 
   return (

@@ -28,7 +28,7 @@ const googleAuth = async (req, res) => {
         googleId,
         provider: "google",
       });
-    } 
+    }
     // 🟢 USER EXISTS (local or google) → just link googleId
     else {
       user.googleId = googleId;
@@ -37,7 +37,7 @@ const googleAuth = async (req, res) => {
 
     // 🔐 Auto login
     const jwtToken = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, email: user.email },
       SECRET_KEY,
       { expiresIn: "7d" }
     );

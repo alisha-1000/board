@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -10,6 +10,15 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  /* ---------- 127.0.0.1 REDIRECT FIX ---------- */
+  useEffect(() => {
+    if (window.location.hostname === "127.0.0.1") {
+      // 🔄 Auto-redirect to localhost to fix Google Auth 403 error
+      const newUrl = window.location.href.replace("127.0.0.1", "localhost");
+      window.location.href = newUrl;
+    }
+  }, []);
 
   const navigate = useNavigate();
   const { setUserLoginStatus } = useContext(boardContext);

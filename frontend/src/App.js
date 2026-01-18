@@ -17,7 +17,7 @@ import BoardProvider from "./store/BoardProvider";
 import ToolboxProvider from "./store/ToolboxProvider";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import { connectSocket, disconnectSocket } from "./utils/socket";
+import { disconnectSocket } from "./utils/socket";
 
 /* ---------------- PROTECTED ROUTE ---------------- */
 
@@ -38,10 +38,10 @@ const ProtectedRoute = ({ children }) => {
 function HomePage() {
   const { id } = useParams();
 
-  // ✅ Socket connects ONLY ONCE when authenticated HomePage mounts
+  // ✅ Socket managed via BoardProvider (Context)
   useEffect(() => {
-    connectSocket();
-    return () => disconnectSocket();
+    // connectSocket(); // Handled by BoardProvider
+    // return () => disconnectSocket();
   }, []);
 
   return (

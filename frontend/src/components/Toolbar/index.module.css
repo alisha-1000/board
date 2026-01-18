@@ -16,6 +16,13 @@
   box-shadow: 1px 0 10px rgba(0, 0, 0, 0.2);
 }
 
+.toolList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .toolItem {
   display: flex;
   justify-content: center;
@@ -25,9 +32,11 @@
   padding: 0.75rem;
   /* p-3 */
   color: black;
-  margin-right: 1.25rem;
-  /* mr-5 */
+  margin-right: 0.75rem;
+  /* Reduced for better fit */
   cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
 }
 
 .toolItem:last-child {

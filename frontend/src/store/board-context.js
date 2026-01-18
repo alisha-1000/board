@@ -7,15 +7,20 @@ const boardContext = createContext({
   elements: [],
   history: [[]],
   index: 0,
-  canvasId: "", 
-  setElements: () => {},
-  boardMouseDownHandler: () => {},
-  setCanvasId: () => {},
-  changeToolHandler: () => {},
-  boardMouseMoveHandler: () => {},
-  boardMouseUpHandler: () => {},
-  setUserLoginStatus: () => {},
-  setHistory: () => {}
+  canvasId: "",
+  sharedEmails: [],
+  socket: null,
+  setElements: () => { },
+  setSharedEmails: () => { },
+  boardMouseDownHandler: () => { },
+  setCanvasId: () => { },
+  changeToolHandler: () => { },
+  boardMouseMoveHandler: () => { },
+  boardMouseUpHandler: () => { },
+  setUserLoginStatus: () => { },
+  setHistory: () => { },
+  currentUser: null,
+  setCurrentUser: () => { }
 });
 
 
