@@ -83,43 +83,81 @@ const Login = () => {
 
   return (
     <div className={styles.loginContainer}>
-      <h2>Login</h2>
+      <div className={styles.loginWrapper}>
+        {/* Welcome Section */}
+        <div className={styles.welcomeSection}>
+          <div className={styles.brandIcon}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <h1 className={styles.welcomeTitle}>Welcome to Whiteboard</h1>
+          <p className={styles.welcomeDescription}>
+            Collaborate in real-time with your team. Draw, sketch, and brainstorm together on an infinite canvas.
+          </p>
+          <div className={styles.features}>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>✨</span>
+              <span>Real-time collaboration</span>
+            </div>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>💬</span>
+              <span>Live chat & comments</span>
+            </div>
+            <div className={styles.feature}>
+              <span className={styles.featureIcon}>🎨</span>
+              <span>Powerful drawing tools</span>
+            </div>
+          </div>
+        </div>
 
-      {/* -------- EMAIL LOGIN -------- */}
-      <form onSubmit={handleSubmit} className={styles.loginForm}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        {/* Login Form Section */}
+        <div className={styles.formSection}>
+          <h2 className={styles.formTitle}>Sign In</h2>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          {/* Email Login */}
+          <form onSubmit={handleSubmit} className={styles.loginForm}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
 
-        <button type="submit">Login</button>
-      </form>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-      {error && <p className={styles.error}>{error}</p>}
+            <button type="submit" className={styles.submitButton}>Sign In</button>
+          </form>
 
-      {/* -------- OR -------- */}
-      <div style={{ margin: "16px 0", textAlign: "center" }}>OR</div>
+          {error && <p className={styles.error}>{error}</p>}
 
-      {/* -------- GOOGLE LOGIN -------- */}
-      <GoogleLogin
-        onSuccess={handleGoogleLogin}
-        onError={() => setError("Google login failed")}
-      />
+          {/* Divider */}
+          <div className={styles.divider}>
+            <span>OR</span>
+          </div>
 
-      <p style={{ marginTop: "16px" }}>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
+          {/* Google Login */}
+          <div className={styles.googleLogin}>
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => setError("Google login failed")}
+            />
+          </div>
+
+          {/* Register Link */}
+          <p className={styles.registerLink}>
+            Don't have an account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
