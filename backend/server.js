@@ -35,13 +35,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/canvas", canvasRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Board backend running 🚀");
+  res.send("Board backend running");
 });
 
 /* ---------------- DB ---------------- */
 connectToDB();
 
-/* ---------------- SOCKET ---------------- */
+/* Socket.io Configuration */
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -57,16 +57,11 @@ const io = new Server(server, {
 
 app.set("socketio", io);
 
-/* ---------------- IN-MEMORY CANVAS CACHE REMOVED ---------------- */
-// const canvasData = {}; // ❌ Removed to prevent memory leak
-
-const roomUsers = {}; // { canvasId: { socketId: userInfo } }
+const roomUsers = {}; // Presence tracking
 
 
 io.on("connection", (socket) => {
-  console.log("🔌 User connected:", socket.id);
-
-  /* -------- JOIN CANVAS -------- */
+  /* Join Canvas Room */
   socket.on("joinCanvas", async ({ canvasId }) => {
     try {
       const authHeader =
@@ -95,7 +90,6 @@ io.on("connection", (socket) => {
 
       socket.join(canvasId);
 
-      // 🟢 Add to presence tracking
       if (!roomUsers[canvasId]) roomUsers[canvasId] = {};
       roomUsers[canvasId][socket.id] = {
         userId,
@@ -115,29 +109,23 @@ io.on("connection", (socket) => {
         sharedEmails: sharedEmails
       });
 
-      // 🟢 Notify others about presence & Show Popup
       io.to(canvasId).emit("presenceUpdate", Object.values(roomUsers[canvasId]));
       socket.to(canvasId).emit("notification", {
         message: `${decoded.email || "Someone"} joined the canvas`,
         type: "success"
       });
-
-      console.log(`✅ User ${socket.id} joined canvas ${canvasId}`);
     } catch (error) {
       console.error("❌ Socket auth error:", error.message);
       socket.emit("unauthorized", { message: "Invalid token" });
     }
   });
 
-  /* -------- DRAW UPDATE -------- */
-  /* -------- DRAWING -------- */
+  /* Drawing Synchronization */
   socket.on("drawingUpdate", ({ canvasId, elements }) => {
-    // 🚀 High-Frequency: Only broadcast to other users (Live Sync)
     socket.to(canvasId).emit("receiveDrawingUpdate", elements);
   });
 
   socket.on("saveCanvas", async ({ canvasId, elements }) => {
-    // 💾 Low-Frequency: Persistent save on mouseUp
     try {
       await Canvas.findByIdAndUpdate(canvasId, { elements });
     } catch (error) {
@@ -145,7 +133,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  /* -------- ADD COMMENT -------- */
+  /* Comment Management */
   socket.on("addComment", async ({ canvasId, comment }) => {
     try {
       const { text, x, y, author } = comment;
@@ -169,13 +157,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  /* -------- LIVE CURSOR -------- */
-  socket.on("cursorMove", ({ canvasId, cursor }) => {
-    // cursor: { x, y, email, userId }
-    socket.to(canvasId).emit("cursorUpdate", { ...cursor, socketId: socket.id });
-  });
-
-  /* -------- CHAT -------- */
+  /* Chat Management */
   socket.on("sendMessage", async ({ canvasId, message }) => {
     try {
       const canvas = await Canvas.findById(canvasId);
@@ -188,7 +170,7 @@ io.on("connection", (socket) => {
         author: message.author,
         email: message.email,
         isOwner: isOwner,
-        clientMsgId: message.clientMsgId, // 🔥 Pass back to dedup on sender
+        clientMsgId: message.clientMsgId,
         createdAt: new Date()
       };
 
@@ -205,9 +187,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  /* -------- DISCONNECT -------- */
+  /* Disconnection Handler */
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
 
     // Cleanup roomUsers
     for (const canvasId in roomUsers) {
@@ -225,7 +206,7 @@ io.on("connection", (socket) => {
   });
 });
 
-/* ---------------- START SERVER ---------------- */
+/* Start Server */
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

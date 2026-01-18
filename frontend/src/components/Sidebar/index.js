@@ -4,16 +4,14 @@ import "./index.min.css";
 import { useNavigate, useParams } from "react-router-dom";
 import boardContext from "../../store/board-context";
 import { API_HOST } from "../../utils/api";
-// import { getSocket } from "../../utils/socket"; // REMOVED
 
 const Sidebar = () => {
   const [canvases, setCanvases] = useState([]);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [joinLink, setJoinLink] = useState(""); // 🔗 For joining existing boards
+  const [joinLink, setJoinLink] = useState(""); // URL or ID for joining boards
 
-  // ✅ TOKEN AS STATE (IMPORTANT)
   const [token, setToken] = useState(
     localStorage.getItem("token")
   );
@@ -109,11 +107,8 @@ const Sidebar = () => {
   useEffect(() => {
     if (!token || !currentUser || !socket) return;
 
-    // const socket = getSocket(); // REMOVED
-
     const handleCanvasShared = ({ userId }) => {
       if (String(userId) === String(currentUser._id)) {
-        console.log("🔔 New canvas shared! Refreshing...");
         setSuccess("A new canvas has been shared with you!");
         setTimeout(() => setSuccess(""), 5000);
         fetchCanvases();
@@ -192,7 +187,6 @@ const Sidebar = () => {
       setError("Please enter an email");
       return;
     }
-    // 🔥 Use id from params (more reliable in Sidebar)
     if (!id || !token) return;
 
     try {
@@ -227,13 +221,11 @@ const Sidebar = () => {
 
     let targetId = joinLink.trim();
 
-    // 🔗 Extract ID if it's a full URL
     if (targetId.includes("/")) {
       const parts = targetId.split("/");
       targetId = parts[parts.length - 1];
     }
 
-    // 🔍 Validate ID shape (MongoDB-like 24 chars)
     if (targetId.length !== 24) {
       setError("Invalid Canvas ID or Link");
       setTimeout(() => setError(""), 3000);
@@ -270,7 +262,6 @@ const Sidebar = () => {
         + Create New Canvas
       </button>
 
-      {/* 🔗 JOIN EXISTING CANVAS */}
       <div className="join-container">
         <input
           type="text"
@@ -282,7 +273,6 @@ const Sidebar = () => {
         <button onClick={handleJoinByLink} className="join-btn">Join</button>
       </div>
 
-      {/* 👤 MANAGE SHARING (OWNER OR COLLABORATOR) - RELOCATED UNDER CREATE BUTTON */}
       {(() => {
         if (!currentUser || !id) return null;
         const currentCanvas = canvases.find(c => c._id === id);
@@ -397,8 +387,6 @@ const Sidebar = () => {
           </li>
         ))}
       </ul>
-
-      {/* REMOVED OLD SHARING PLACEMENT */}
 
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}

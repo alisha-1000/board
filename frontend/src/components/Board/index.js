@@ -6,7 +6,6 @@ import { TOOL_ACTION_TYPES, TOOL_ITEMS } from "../../constants";
 import Comment from "../Comment";
 import Chat from "../Chat";
 import Notification from "../Notification";
-// import { getSocket } from "../../utils/socket"; // REMOVED
 import { getSvgPathFromStroke, restoreElements } from "../../utils/element";
 import getStroke from "perfect-freehand";
 import classes from "./index.module.css";
@@ -25,7 +24,7 @@ const getUserColor = (email) => {
 function Board({ id }) {
   const canvasRef = useRef(null);
   const textAreaRef = useRef(null);
-  const isLocalChangeRef = useRef(false); // 🔥 Guard against sync loops
+  const isLocalChangeRef = useRef(false); // Prevents synchronization loops
 
   const {
     activeToolItem,
@@ -39,7 +38,7 @@ function Board({ id }) {
     redo,
     setCanvasId,
     setElements,
-    setRemoteElements, // 🎯 Use this for socket updates
+    setRemoteElements, // Update local state from socket
     currentUser,
     sharedEmails,
     setSharedEmails,
@@ -59,13 +58,12 @@ function Board({ id }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  const lastEmitTime = useRef(0); // ⏲️ For throttling socket emits
+  const lastEmitTime = useRef(0); // For throttling socket emissions
 
 
-  /* ---------------- SET CANVAS ID (CRITICAL FIX) ---------------- */
+  /* Update Canvas ID */
   useEffect(() => {
     if (!id) return;
-    // 🔥 ALWAYS set canvasId (independent of socket)
     setCanvasId(id);
   }, [id, setCanvasId]);
 
@@ -104,14 +102,13 @@ function Board({ id }) {
 
     const handleNewMessage = (message) => {
       setChatMessages((prev) => {
-        // Prevent adding duplicate if it's our own optimistic message that just came back
+        // Prevents adding duplicate messages if it's an optimistic update that has been confirmed by the server
         if (message.clientMsgId && prev.some(m => m.clientMsgId === message.clientMsgId)) {
-          return prev.map(m => m.clientMsgId === message.clientMsgId ? message : m); // Update with server data (id, createdAt)
+          return prev.map(m => m.clientMsgId === message.clientMsgId ? message : m);
         }
         return [...prev, message];
       });
 
-      // 🔔 TRIGGER NOTIFICATION for others
       if (message.email !== currentUserRef.current?.email) {
         setNotifications((prev) => [
           ...prev,
@@ -129,7 +126,6 @@ function Board({ id }) {
     };
 
     const handleUnauthorized = () => {
-      // alert("Access Denied: You cannot edit this canvas.");
       setIsAuthorized(false);
     };
 
@@ -165,7 +161,7 @@ function Board({ id }) {
     };
   }, [id, setElements, setSharedEmails, socket]);
 
-  /* ---------------- CANVAS SIZE ---------------- */
+  /* Canvas Sizing */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -185,37 +181,30 @@ function Board({ id }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [undo, redo]);
 
-  /* ---------------- DRAWING SYNC (CENTRALIZED) ---------------- */
+  /* Drawing Synchronization */
   useEffect(() => {
-    // const socket = getSocket(); // REMOVED
     if (!socket || !id) return;
 
-    // ONLY emit if this change originated from THIS user
     if (!isLocalChangeRef.current) return;
 
     if (toolActionType === TOOL_ACTION_TYPES.DRAWING ||
       toolActionType === TOOL_ACTION_TYPES.ERASING ||
       toolActionType === TOOL_ACTION_TYPES.WRITING) {
-      // 🚀 Live broadcast (high frequency)
       socket.emit("drawingUpdate", { canvasId: id, elements });
     }
 
     if (toolActionType === TOOL_ACTION_TYPES.NONE) {
-      // 💾 Final persistent save (low frequency)
-      console.log("💾 Emitting saveCanvas...");
       setIsSaving(true);
       socket.emit("saveCanvas", { canvasId: id, elements });
       isLocalChangeRef.current = false;
 
-      // Reset saving indicator after a delay
       const timer = setTimeout(() => setIsSaving(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [elements, toolActionType, id, socket]);
 
-  /* ---------------- DRAWING ---------------- */
+  /* Drawing Render */
   useLayoutEffect(() => {
-    console.log("🎨 Rendering elements:", elements.length, elements);
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -231,7 +220,6 @@ function Board({ id }) {
         case TOOL_ITEMS.CIRCLE:
         case TOOL_ITEMS.ARROW:
           if (!element.roughEle) {
-            console.warn("⚠️ Element missing roughEle:", element);
             return;
           }
           roughCanvas.draw(element.roughEle);
@@ -263,15 +251,13 @@ function Board({ id }) {
     });
   }, [elements]);
 
-  /* ---------------- MOUSE HANDLERS ---------------- */
+  /* Mouse Event Handlers */
   const handleMouseDown = (e) => {
-    console.log("🖱️ Mouse Down");
     if (!isAuthorized) return;
 
     const { clientX, clientY } = e;
-    isLocalChangeRef.current = true; // 🎯 Local drawing started
+    isLocalChangeRef.current = true;
 
-    // 💬 COMMENT TOOL LOGIC
     if (activeToolItem === TOOL_ITEMS.COMMENT) {
       setNewComment({ x: clientX, y: clientY });
       return;
@@ -283,9 +269,8 @@ function Board({ id }) {
   const handleMouseMove = (e) => {
     if (!isAuthorized) return;
     boardMouseMoveHandler(e);
-    isLocalChangeRef.current = true; // 🎯 Local change moving
+    isLocalChangeRef.current = true;
 
-    // 🚀 Real-time Live Drawing Move Updates
     const now = Date.now();
     if (socket && now - lastEmitTime.current > 30) {
       lastEmitTime.current = now;
@@ -309,7 +294,6 @@ function Board({ id }) {
         role="img"
       />
 
-      {/* 🔔 NOTIFICATIONS */}
       {notifications.map((n) => (
         <Notification
           key={n.id}
@@ -319,7 +303,6 @@ function Board({ id }) {
         />
       ))}
 
-      {/* 💬 CHAT */}
       <Chat
         messages={chatMessages}
         currentUser={currentUser}
@@ -331,7 +314,7 @@ function Board({ id }) {
             email: userEmail,
             userId: currentUser?._id,
             createdAt: new Date().toISOString(),
-            clientMsgId: `cms-${Date.now()}-${Math.random()}` // 🔥 Shared ID for deduplication
+            clientMsgId: `cms-${Date.now()}-${Math.random()}`
           };
 
           // Optimistic Update
@@ -346,11 +329,10 @@ function Board({ id }) {
         }}
       />
 
-      {/* 🟢 PRESENCE LIST */}
       <section className={classes.presenceContainer} aria-label="Online Participants">
         <div className={classes.presenceRow}>
           <div className={classes.savingIndicator}>
-            {isSaving ? "💾 Saving..." : "✅ Saved"}
+            {isSaving ? "Saving..." : "Saved"}
           </div>
         </div>
 
@@ -384,7 +366,6 @@ function Board({ id }) {
         />
       )}
 
-      {/* 💬 RENDER COMMENTS */}
       <section aria-label="Comments">
         {comments.map((comment, index) => (
           <Comment
@@ -398,7 +379,6 @@ function Board({ id }) {
         ))}
       </section>
 
-      {/* 💬 NEW COMMENT INPUT */}
       {newComment && (
         <div
           style={{
@@ -418,7 +398,6 @@ function Board({ id }) {
             placeholder="Type comment..."
             onKeyDown={(e) => {
               if (e.key === "Enter" && e.target.value.trim()) {
-                // const socket = getSocket(); // REMOVED - using socket from context instead
                 const commentData = {
                   text: e.target.value,
                   x: newComment.x,
@@ -426,7 +405,6 @@ function Board({ id }) {
                   author: currentUser?.email?.split("@")[0] || "Guest",
                 };
 
-                // Emit to server
                 if (socket) {
                   socket.emit("addComment", {
                     canvasId: id,

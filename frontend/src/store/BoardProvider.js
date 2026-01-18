@@ -178,7 +178,7 @@ const BoardProvider = ({ children }) => {
   /* ---------- TOOL HANDLERS ---------- */
 
 
-  /* ---------- STATE REF (Fixes Stale Closures + Performance) ---------- */
+  /* Reference to current state for use in callbacks */
   const stateRef = React.useRef(state);
   React.useEffect(() => {
     stateRef.current = state;
@@ -266,8 +266,7 @@ const BoardProvider = ({ children }) => {
     });
   }, []);
 
-  /* ---------- TEXTAREA BLUR HANDLER (FIXED) ---------- */
-
+  /* Textarea Blur Handler */
   const textAreaBlurHandler = useCallback((text) => {
     const currentState = stateRef.current;
     if (text === undefined || text === null) return;

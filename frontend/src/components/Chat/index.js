@@ -19,7 +19,7 @@ const Chat = ({ messages, onSendMessage, currentUser }) => {
         }
     }, [messages, isOpen]);
 
-    // Handle unread count
+    /* Handle unread count for messages received while chat is closed */
     useEffect(() => {
         if (!isOpen && messages.length > prevMessagesRef.current.length) {
             const newMessages = messages.slice(prevMessagesRef.current.length);
@@ -38,7 +38,7 @@ const Chat = ({ messages, onSendMessage, currentUser }) => {
         setInputText("");
     };
 
-    // Helper to generate a unique color from an email
+    /* Generate a unique color from an email string */
     const getUserColor = (email) => {
         if (!email) return "#3498db";
         let hash = 0;
