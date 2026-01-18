@@ -352,6 +352,7 @@ function Board({ id }) {
         <textarea
           ref={textAreaRef}
           className={classes.textElementBox}
+          autoFocus
           style={{
             top: elements[elements.length - 1].y1,
             left: elements[elements.length - 1].x1,
