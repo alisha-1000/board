@@ -40,7 +40,6 @@ function Board({ id }) {
     setElements,
     setRemoteElements, // Update local state from socket
     currentUser,
-    sharedEmails,
     setSharedEmails,
     socket,
   } = useContext(boardContext);
@@ -135,9 +134,6 @@ function Board({ id }) {
       setPresence(users);
     };
 
-    const handleCursorRemove = ({ socketId }) => {
-    };
-
     socket.on("receiveDrawingUpdate", handleReceive);
     socket.on("loadCanvas", handleLoad);
     socket.on("newMessage", handleNewMessage);
@@ -159,7 +155,7 @@ function Board({ id }) {
       socket.off("notification", handleNotification);
       socket.off("unauthorized", handleUnauthorized);
     };
-  }, [id, setElements, setSharedEmails, socket]);
+  }, [id, setElements, setSharedEmails, setRemoteElements, socket]);
 
   /* Canvas Sizing */
   useEffect(() => {
