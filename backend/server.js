@@ -20,12 +20,19 @@ const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 /* ---------------- MIDDLEWARE ---------------- */
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://whiteboard-tutorial-eight.vercel.app",
-      "https://whiteboard-rosy-nu.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+      ];
+
+      // Allow all Vercel deployments
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
@@ -47,12 +54,18 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://whiteboard-tutorial-eight.vercel.app",
-      "https://whiteboard-rosy-nu.vercel.app",
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+      ];
+
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST"],
   },
 });
