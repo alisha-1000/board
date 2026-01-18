@@ -10,10 +10,11 @@
   /* rounded */
   border: 1px solid #9ca3af;
   /* border-gray-400 */
-  z-index: 50;
+  z-index: 100;
   background-color: white;
   transform: translateX(-50%);
   box-shadow: 1px 0 10px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
 }
 
 .toolList {
