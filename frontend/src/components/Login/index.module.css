@@ -8,6 +8,8 @@
   position: relative;
   overflow: hidden;
   font-family: 'Lato', sans-serif;
+  background: #2d3748;
+  /* Fallback color */
 }
 
 .videoBackground {
