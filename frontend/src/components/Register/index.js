@@ -133,6 +133,10 @@ const Register = () => {
 
   return (
     <div className={styles.registerContainer}>
+      <video autoPlay loop muted playsInline className={styles.videoBackground}>
+        <source src="https://videos.pexels.com/video-files/3753517/3753517-hd_1920_1080_25fps.mp4" type="video/mp4" />
+      </video>
+      <div className={styles.overlay}></div>
       <div className={styles.registerWrapper}>
         {/* Welcome Section */}
         <div className={styles.welcomeSection}>
@@ -248,7 +252,7 @@ const Register = () => {
           </p>
 
           <p className={styles.terms}>
-            By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+            By creating an account, you agree to our <a href="/" onClick={(e) => e.preventDefault()}>Terms of Service</a> and <a href="/" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
           </p>
         </div>
       </div>

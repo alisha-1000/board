@@ -169,6 +169,9 @@ function Board({ id }) {
   /* ---------------- KEYBOARD SHORTCUTS ---------------- */
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Prevent board shortcuts if user is typing in input or textarea
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
       if (e.ctrlKey && e.key === "z") undo();
       if (e.ctrlKey && e.key === "y") redo();
     };
@@ -248,6 +251,14 @@ function Board({ id }) {
   }, [elements]);
 
   /* Mouse Event Handlers */
+  useEffect(() => {
+    if (toolActionType === TOOL_ACTION_TYPES.WRITING && textAreaRef.current) {
+      setTimeout(() => {
+        textAreaRef.current.focus();
+      }, 0);
+    }
+  }, [toolActionType]);
+
   const handleMouseDown = (e) => {
     if (!isAuthorized) return;
 
@@ -359,6 +370,7 @@ function Board({ id }) {
             fontSize: `${elements[elements.length - 1].size}px`,
             color: elements[elements.length - 1].stroke,
           }}
+          onKeyDown={(e) => e.stopPropagation()}
           onBlur={(e) => textAreaBlurHandler(e.target.value)}
         />
       )}

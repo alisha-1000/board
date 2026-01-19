@@ -84,6 +84,10 @@ const Login = () => {
 
   return (
     <div className={styles.loginContainer}>
+      <video autoPlay loop muted playsInline className={styles.videoBackground}>
+        <source src="https://videos.pexels.com/video-files/3753517/3753517-hd_1920_1080_25fps.mp4" type="video/mp4" />
+      </video>
+      <div className={styles.overlay}></div>
       <div className={styles.loginWrapper}>
         {/* Welcome Section */}
         <div className={styles.welcomeSection}>

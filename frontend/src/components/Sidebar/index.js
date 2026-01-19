@@ -181,21 +181,47 @@ const Sidebar = () => {
     }
   };
 
+  const [isSharing, setIsSharing] = useState(false);
+
   /* ---------------- SHARE CANVAS ---------------- */
   const handleShare = async () => {
-    if (!email.trim()) {
+    const emailToShare = email.trim();
+    if (!emailToShare) {
       setError("Please enter an email");
       return;
     }
     if (!id || !token) return;
 
+    // Prevent sharing with self
+    if (currentUser && currentUser.email === emailToShare) {
+      setError("You cannot share the board with yourself.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    // Prevent sharing with existing collaborator
+    const currentCanvas = canvases.find(c => c._id === id);
+    if (currentCanvas && currentCanvas.shared) {
+      const isAlreadyShared = currentCanvas.shared.some(u => {
+        const uEmail = typeof u === 'string' ? u : u.email;
+        return uEmail === emailToShare;
+      });
+
+      if (isAlreadyShared) {
+        setError("User is already a collaborator.");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
+    }
+
     try {
+      setIsSharing(true);
       setError("");
       setSuccess("");
 
       const response = await axios.put(
         `${API_HOST}/api/canvas/share/${id}`,
-        { email },
+        { email: emailToShare },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -212,6 +238,8 @@ const Sidebar = () => {
       console.error("Share error:", err.response?.data);
       setError(err.response?.data?.error || err.response?.data?.message || "Failed to share canvas");
       setTimeout(() => setError(""), 5000);
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -299,7 +327,9 @@ const Sidebar = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <button onClick={handleShare} className="share-btn">Add</button>
+              <button onClick={handleShare} className="share-btn" disabled={isSharing}>
+                {isSharing ? "..." : "Add"}
+              </button>
             </div>
 
             <div className="individual-sharing">

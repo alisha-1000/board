@@ -91,7 +91,13 @@ const boardReducer = (state, action) => {
 
     case BOARD_ACTIONS.CHANGE_TEXT: {
       const elements = [...state.elements];
-      elements[elements.length - 1].text = action.payload.text;
+      const index = elements.length - 1;
+      if (index >= 0) {
+        elements[index] = {
+          ...elements[index],
+          text: action.payload.text,
+        };
+      }
 
       const snapshot = JSON.parse(JSON.stringify(elements));
       const history = state.history.slice(0, state.index + 1);
