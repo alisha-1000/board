@@ -1,6 +1,6 @@
 import { ARROW_LENGTH, TOOL_ITEMS } from "../constants";
 import getStroke from "perfect-freehand";
-import rough from "roughjs";
+import rough from "roughjs/bin/rough";
 import { getArrowHeadsCoordinates, isPointCloseToLine } from "./math";
 
 const gen = rough.generator();
@@ -30,7 +30,7 @@ export const createElement = (
   const options = {
     seed: id + 1,
     stroke,
-    fill,
+    fill: fill ? fill : undefined, // Ensure no-fill if null
     strokeWidth: size,
     fillStyle: "solid",
   };
