@@ -91,11 +91,18 @@ const boardReducer = (state, action) => {
     case BOARD_ACTIONS.CHANGE_TEXT: {
       const elements = [...state.elements];
       const index = elements.length - 1;
+
+      // If valid index, update text. If text is empty, we might want to discard?
+      // For now, let's keep it but ensure we handle potential cleanup if needed.
       if (index >= 0) {
-        elements[index] = {
-          ...elements[index],
-          text: action.payload.text,
-        };
+        if (!action.payload.text || action.payload.text.trim() === "") {
+          elements.pop(); // Remove empty text element
+        } else {
+          elements[index] = {
+            ...elements[index],
+            text: action.payload.text,
+          };
+        }
       }
 
       const snapshot = JSON.parse(JSON.stringify(elements));
@@ -114,6 +121,7 @@ const boardReducer = (state, action) => {
       if (state.index <= 0) return state;
       return {
         ...state,
+        toolActionType: TOOL_ACTION_TYPES.NONE,
         elements: state.history[state.index - 1],
         index: state.index - 1,
       };
@@ -122,6 +130,7 @@ const boardReducer = (state, action) => {
       if (state.index >= state.history.length - 1) return state;
       return {
         ...state,
+        toolActionType: TOOL_ACTION_TYPES.NONE,
         elements: state.history[state.index + 1],
         index: state.index + 1,
       };
