@@ -9,7 +9,11 @@ const boardReducer = (state, action) => {
   switch (action.type) {
     case BOARD_ACTIONS.CHANGE_TOOL:
       console.log("Reducer: CHANGE_TOOL", action.payload.tool);
-      return { ...state, activeToolItem: action.payload.tool };
+      return {
+        ...state,
+        activeToolItem: action.payload.tool,
+        toolActionType: action.payload.tool === TOOL_ITEMS.TEXT ? TOOL_ACTION_TYPES.NONE : state.toolActionType
+      };
 
     case BOARD_ACTIONS.CHANGE_ACTION_TYPE:
       return { ...state, toolActionType: action.payload.actionType };
