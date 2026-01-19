@@ -12,7 +12,7 @@ const boardReducer = (state, action) => {
       return {
         ...state,
         activeToolItem: action.payload.tool,
-        toolActionType: action.payload.tool === TOOL_ITEMS.TEXT ? TOOL_ACTION_TYPES.NONE : state.toolActionType
+        toolActionType: TOOL_ACTION_TYPES.NONE
       };
 
     case BOARD_ACTIONS.CHANGE_ACTION_TYPE:
@@ -82,14 +82,9 @@ const boardReducer = (state, action) => {
         (el) => !isPointNearElement(el, clientX, clientY)
       );
 
-      const snapshot = JSON.parse(JSON.stringify(filtered));
-      const history = state.history.slice(0, state.index + 1);
-
       return {
         ...state,
         elements: filtered,
-        history: [...history, snapshot],
-        index: history.length,
       };
     }
 
@@ -266,7 +261,10 @@ const BoardProvider = ({ children }) => {
     const currentState = stateRef.current;
     if (currentState.toolActionType === TOOL_ACTION_TYPES.WRITING) return;
 
-    if (currentState.toolActionType === TOOL_ACTION_TYPES.DRAWING) {
+    if (
+      currentState.toolActionType === TOOL_ACTION_TYPES.DRAWING ||
+      currentState.toolActionType === TOOL_ACTION_TYPES.ERASING
+    ) {
       dispatch({ type: BOARD_ACTIONS.DRAW_UP });
     }
 
