@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
-import rough from "roughjs/bin/rough";
+import rough from "roughjs";
 import boardContext from "../../store/board-context";
 import toolboxContext from "../../store/toolbox-context";
 import { TOOL_ACTION_TYPES, TOOL_ITEMS } from "../../constants";
@@ -359,21 +359,23 @@ function Board({ id }) {
         </div>
       </section>
 
-      {toolActionType === TOOL_ACTION_TYPES.WRITING && elements.length > 0 && (
-        <textarea
-          ref={textAreaRef}
-          className={classes.textElementBox}
-          autoFocus
-          style={{
-            top: elements[elements.length - 1].y1,
-            left: elements[elements.length - 1].x1,
-            fontSize: `${elements[elements.length - 1].size}px`,
-            color: elements[elements.length - 1].stroke,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-          onBlur={(e) => textAreaBlurHandler(e.target.value)}
-        />
-      )}
+      {toolActionType === TOOL_ACTION_TYPES.WRITING &&
+        elements.length > 0 &&
+        elements[elements.length - 1].type === TOOL_ITEMS.TEXT && (
+          <textarea
+            ref={textAreaRef}
+            className={classes.textElementBox}
+            autoFocus
+            style={{
+              top: elements[elements.length - 1].y1,
+              left: elements[elements.length - 1].x1,
+              fontSize: `${elements[elements.length - 1].size}px`,
+              color: elements[elements.length - 1].stroke,
+            }}
+            onKeyDown={(e) => e.stopPropagation()}
+            onBlur={(e) => textAreaBlurHandler(e.target.value)}
+          />
+        )}
 
       <section aria-label="Comments">
         {comments.map((comment, index) => (
