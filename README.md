@@ -9,7 +9,7 @@
 
 CollabBoard is a powerful, real-time collaborative whiteboard application that allows multiple users to draw, brainstorm, and communicate in a shared canvas environment. Built with modern web technologies, it offers a seamless and interactive experience for teams and individuals.
 
-**🚀 [Try the Live Demo](https://whiteboard-rosy-nu.vercel.app/)**
+Live Demo - https://whiteboard-rosy-nu.vercel.app/
 
 ---
 
