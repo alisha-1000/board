@@ -124,7 +124,7 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 
 ---
 
-## 🎮 How to Use
+## How to Use
 
 1. **Sign Up / Login**: Create an account or sign in using Google.
 2. **Create a Board**: Start a new canvas from the sidebar.
@@ -132,4 +132,4 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 4. **Draw**: Use the toolbar to select different tools (Pen, Shapes, Text).
 5. **Chat**: Use the chat window to communicate with other collaborators in real-time.
 
----
+
