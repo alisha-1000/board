@@ -6,10 +6,13 @@
 ![Socket.io](https://img.shields.io/badge/Real--time-Socket.io-010101?logo=socket.io)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb)
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?logo=vercel)](https://whiteboard-rosy-nu.vercel.app/)
+[![Render](https://img.shields.io/badge/Render-Deployed-4353ff?logo=render)](https://board-2-2su7.onrender.com)
 
 CollabBoard is a powerful, real-time collaborative whiteboard application that allows multiple users to draw, brainstorm, and communicate in a shared canvas environment. Built with modern web technologies, it offers a seamless and interactive experience for teams and individuals.
 
-Live Demo - https://whiteboard-rosy-nu.vercel.app/
+**Deployed Links:**
+- **Frontend**: https://whiteboard-rosy-nu.vercel.app/
+- **Backend (API)**: https://board-2-2su7.onrender.com/
 
 ---
 
