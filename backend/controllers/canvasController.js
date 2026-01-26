@@ -122,10 +122,13 @@ exports.shareCanvas = async (req, res) => {
                     inviterEmail,
                 });
             });
-            res.json({ message: `Invitation sent to ${email}. Waiting for response...` });
-        } else {
-            res.status(400).json({ error: "User is currently offline and cannot accept invitations." });
+            return res.json({ message: `Invitation sent to ${email}. Waiting for response...` });
         }
+
+        // User is offline: Add directly to shared list so they see it later
+        canvas.shared.push(userToShare._id);
+        await canvas.save();
+        res.json({ message: `User is offline. Canvas has been shared directly with ${email}.` });
     } catch (error) {
         res.status(500).json({ error: "Failed to send invitation", details: error.message });
     }
