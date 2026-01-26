@@ -1,4 +1,4 @@
-# 🎨 CollabBoard - Real-time Collaborative Whiteboard
+#  CollabBoard - Real-time Collaborative Whiteboard
 
 ![CollabBoard Banner](https://img.shields.io/badge/Status-Active-brightgreen)
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)
@@ -16,24 +16,24 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🚀 Real-time Collaboration**: See changes instantly as they happen. Multi-user cursor tracking and live drawing synchronization ensure everyone stays on the same page.
-- **🛠️ Versatile Drawing Tools**:
+- ** Real-time Collaboration**: See changes instantly as they happen. Multi-user cursor tracking and live drawing synchronization ensure everyone stays on the same page.
+- ** Versatile Drawing Tools**:
   - **Freehand**: Smooth brush strokes for natural sketching.
   - **Shapes**: Precise tools for Lines, Rectangles, Circles, and Arrows.
   - **Text**: Add annotations and notes directly on the canvas.
-- **💬 Live Chat**: Integrated real-time chat for quick communication while brainstorming.
-- **🔒 Secure Access**:
+- ** Live Chat**: Integrated real-time chat for quick communication while brainstorming.
+- ** Secure Access**:
   - Email & Password authentication.
   - Google OAuth integration for quick sign-in.
   - Private boards and secure sharing mechanisms.
-- **📱 Responsive Design**: Optimized for different screen sizes using Tailwind CSS.
-- **🎨 Rich Aesthetics**: Clean, modern UI with glassmorphism effects and intuitive navigation.
+- ** Responsive Design**: Optimized for different screen sizes using Tailwind CSS.
+- ** Rich Aesthetics**: Clean, modern UI with glassmorphism effects and intuitive navigation.
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **Framework**: [React](https://reactjs.org/)
@@ -52,7 +52,7 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```text
 .
@@ -74,7 +74,7 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js (v16+)
@@ -133,17 +133,3 @@ CollabBoard is a powerful, real-time collaborative whiteboard application that a
 5. **Chat**: Use the chat window to communicate with other collaborators in real-time.
 
 ---
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Developed with ❤️ by Alisha Gupta
