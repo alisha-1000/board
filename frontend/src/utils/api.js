@@ -4,9 +4,11 @@ import axios from "axios";
 // Allow overriding via env var, otherwise default to local backend for development
 // Allow overriding via env var, otherwise default to local backend for development
 // ⚡️ FIX: Use 127.0.0.1 instead of localhost to avoid IPv6 lookup delay on macOS
-export const API_HOST =
-  process.env.REACT_APP_API_BASE_URL?.replace(/\/+$/, "") ||
-  "http://127.0.0.1:5001";
+// ⚡️ FIX: Auto-detect if we should use local or production API
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+export const API_HOST = isLocal
+  ? "http://127.0.0.1:5001"
+  : (process.env.REACT_APP_API_BASE_URL?.replace(/\/+$/, "") || "http://127.0.0.1:5001");
 
 const API_BASE_URL = `${API_HOST}/api/canvas`;
 

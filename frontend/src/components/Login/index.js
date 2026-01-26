@@ -52,33 +52,17 @@ const Login = () => {
   /* ---------- GOOGLE LOGIN ---------- */
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch(
-        `${API_HOST}/api/users/google`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token: credentialResponse.credential,
-          }),
-        }
-      );
+      const response = await axios.post(`${API_HOST}/api/users/google`, {
+        token: credentialResponse.credential,
+      });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Google login failed");
-        return;
-      }
-
-      //  FIX: correct token key
-      localStorage.setItem("token", data.token);
-
+      const { token: jwtToken } = response.data;
+      localStorage.setItem("token", jwtToken);
       setUserLoginStatus(true);
-
       navigate("/", { replace: true });
     } catch (err) {
       console.error("Google login error:", err);
-      setError("Google login failed");
+      setError(err.response?.data?.message || "Google login failed");
     }
   };
 

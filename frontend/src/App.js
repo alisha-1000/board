@@ -22,12 +22,13 @@ import { disconnectSocket } from "./utils/socket";
 
 /* ---------------- PROTECTED ROUTE ---------------- */
 
+/* ---------------- PROTECTED ROUTE ---------------- */
+
 const ProtectedRoute = ({ children }) => {
-  // FIX: correct token key
   const token = localStorage.getItem("token");
 
   if (!token) {
-    disconnectSocket(); // stop socket if unauthenticated
+    disconnectSocket();
     return <Navigate to="/login" replace />;
   }
 
@@ -38,12 +39,6 @@ const ProtectedRoute = ({ children }) => {
 
 function HomePage() {
   const { id } = useParams();
-
-  // Socket managed via BoardProvider (Context)
-  useEffect(() => {
-    // connectSocket(); // Handled by BoardProvider
-    // return () => disconnectSocket();
-  }, []);
 
   return (
     <ToolboxProvider>
@@ -64,6 +59,8 @@ function App() {
     process.env.REACT_APP_GOOGLE_CLIENT_ID ||
     "727558649512-kq44kgr799hq6f7rho88gocu79tqgp9k.apps.googleusercontent.com";
 
+  const token = localStorage.getItem("token");
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <BoardProvider>
@@ -71,7 +68,10 @@ function App() {
         <Router>
           <Routes>
             {/* PUBLIC ROUTES */}
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={token ? <Navigate to="/" replace /> : <Login />}
+            />
             <Route path="/register" element={<Register />} />
 
             {/* PROTECTED ROUTES */}
@@ -92,6 +92,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* FALLBACK */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </BoardProvider>
