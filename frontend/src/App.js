@@ -17,6 +17,7 @@ import BoardProvider from "./store/BoardProvider";
 import ToolboxProvider from "./store/ToolboxProvider";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import InviteModal from "./components/InviteModal";
 import { disconnectSocket } from "./utils/socket";
 
 /* ---------------- PROTECTED ROUTE ---------------- */
@@ -66,6 +67,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <BoardProvider>
+        <InviteModal />
         <Router>
           <Routes>
             {/* PUBLIC ROUTES */}

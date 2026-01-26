@@ -101,40 +101,33 @@ exports.shareCanvas = async (req, res) => {
             return res.status(403).json({ error: "Only authorized users can share this canvas" });
         }
 
-        // Ensure the shared userId is an ObjectId
-        const sharedUserId = new mongoose.Types.ObjectId(userToShare._id);
-
-        // Prevent adding the owner to shared list
-        if (canvas.owner.toString() === sharedUserId.toString()) {
-            return res.status(400).json({ error: "Owner cannot be added to shared list" });
+        if (canvas.owner.toString() === userToShare._id.toString()) {
+            return res.status(400).json({ error: "You are the owner of this canvas" });
         }
 
-        // Check if the user is already in the shared array
-        const alreadyShared = canvas.shared.some(id => id.toString() === sharedUserId.toString());
-        if (alreadyShared) {
-            return res.status(400).json({ error: "Already shared with user" });
+        if (canvas.shared.some(id => id.toString() === userToShare._id.toString())) {
+            return res.status(400).json({ error: "Already shared with this user" });
         }
 
-        // Add user to shared list
-        canvas.shared.push(sharedUserId);
-        await canvas.save();
-
-        // Populate to send back current list
-        const updatedCanvas = await Canvas.findById(canvasId).populate("shared", "email");
-        const sharedEmails = updatedCanvas.shared.map(u => u.email);
-
-        // Real-time Notification
+        // Real-time Notification for Invitation
         const io = req.app.get("socketio");
-        if (io) {
-            // Global broadcast for the sidebar notification
-            io.emit("canvasShared", { userId: userToShare._id });
-            // Room specific update for immediate UI sync
-            io.to(canvasId).emit("sharingUpdate", { sharedEmails });
-        }
+        const globalUsers = req.app.get("globalUsers");
 
-        res.json({ message: "Canvas shared successfully", sharedEmails });
+        if (io && globalUsers && globalUsers[userToShare._id.toString()]) {
+            const inviterEmail = req.user.email || "Someone";
+            globalUsers[userToShare._id.toString()].forEach(sid => {
+                io.to(sid).emit("inviteRequest", {
+                    canvasId,
+                    inviterId: userId,
+                    inviterEmail,
+                });
+            });
+            res.json({ message: `Invitation sent to ${email}. Waiting for response...` });
+        } else {
+            res.status(400).json({ error: "User is currently offline and cannot accept invitations." });
+        }
     } catch (error) {
-        res.status(500).json({ error: "Failed to share canvas", details: error.message });
+        res.status(500).json({ error: "Failed to send invitation", details: error.message });
     }
 };
 

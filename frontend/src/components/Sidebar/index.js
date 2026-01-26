@@ -10,7 +10,7 @@ const Sidebar = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [joinLink, setJoinLink] = useState(""); // URL or ID for joining boards
+
 
   const [token, setToken] = useState(
     localStorage.getItem("token")
@@ -243,29 +243,7 @@ const Sidebar = () => {
     }
   };
 
-  /* ---------------- JOIN VIA LINK/ID ---------------- */
-  const handleJoinByLink = useCallback(() => {
-    if (!joinLink.trim()) return;
 
-    let targetId = joinLink.trim();
-
-    if (targetId.includes("/")) {
-      const parts = targetId.split("/");
-      targetId = parts[parts.length - 1];
-    }
-
-    if (targetId.length !== 24) {
-      setError("Invalid Canvas ID or Link");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
-
-    setCanvasId(targetId);
-    navigate(`/${targetId}`);
-    setJoinLink("");
-    setSuccess("Joining canvas...");
-    setTimeout(() => setSuccess(""), 3000);
-  }, [joinLink, navigate, setCanvasId]);
 
   /* ---------------- AUTH ---------------- */
   const handleLogout = () => {
@@ -290,16 +268,7 @@ const Sidebar = () => {
         + Create New Canvas
       </button>
 
-      <div className="join-container">
-        <input
-          type="text"
-          placeholder="Paste Board Link or ID"
-          value={joinLink}
-          onChange={(e) => setJoinLink(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleJoinByLink()}
-        />
-        <button onClick={handleJoinByLink} className="join-btn">Join</button>
-      </div>
+
 
       {(() => {
         if (!currentUser || !id) return null;

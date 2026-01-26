@@ -164,6 +164,9 @@ const boardReducer = (state, action) => {
     case "SET_SOCKET":
       return { ...state, socket: action.payload };
 
+    case "SET_SHARE_INVITE":
+      return { ...state, shareInvite: action.payload };
+
     default:
       return state;
   }
@@ -182,12 +185,18 @@ const initialBoardState = {
   currentUser: null,
   sharedEmails: [],
   socket: null,
+  shareInvite: null, // { canvasId, inviterId, inviterEmail }
 };
 
 /* ---------------- PROVIDER ---------------- */
 
 const BoardProvider = ({ children }) => {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState);
+
+  // Set shareInvite handler
+  const setShareInvite = useCallback((invite) => {
+    dispatch({ type: "SET_SHARE_INVITE", payload: invite });
+  }, []);
 
   /* ---------- TOOL HANDLERS ---------- */
 
@@ -206,6 +215,10 @@ const BoardProvider = ({ children }) => {
     if (state.isUserLoggedIn) {
       currentSocket = connectSocket();
       dispatch({ type: "SET_SOCKET", payload: currentSocket });
+
+      currentSocket.on("inviteRequest", (invite) => {
+        dispatch({ type: "SET_SHARE_INVITE", payload: invite });
+      });
     } else {
       disconnectSocket();
       dispatch({ type: "SET_SOCKET", payload: null });
@@ -347,6 +360,7 @@ const BoardProvider = ({ children }) => {
     currentUser: state.currentUser,
     sharedEmails: state.sharedEmails,
     socket: state.socket,
+    shareInvite: state.shareInvite,
 
     changeToolHandler,
     boardMouseDownHandler,
@@ -362,6 +376,7 @@ const BoardProvider = ({ children }) => {
     setUserLoginStatus,
     setCurrentUser,
     setSharedEmails,
+    setShareInvite,
   }), [
     state.activeToolItem,
     state.elements,
@@ -371,6 +386,7 @@ const BoardProvider = ({ children }) => {
     state.currentUser,
     state.sharedEmails,
     state.socket,
+    state.shareInvite,
     changeToolHandler,
     boardMouseDownHandler,
     boardMouseMoveHandler,
@@ -383,7 +399,8 @@ const BoardProvider = ({ children }) => {
     setRemoteElements,
     setUserLoginStatus,
     setCurrentUser,
-    setSharedEmails
+    setSharedEmails,
+    setShareInvite
   ]);
 
   return (

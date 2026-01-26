@@ -70,12 +70,40 @@ const io = new Server(server, {
   },
 });
 
-app.set("socketio", io);
+const roomUsers = {}; // Presence tracking by canvasId
+const globalUsers = {}; // Presence tracking by userId: { userId: Set of socketIds }
 
-const roomUsers = {}; // Presence tracking
+app.set("socketio", io);
+app.set("globalUsers", globalUsers);
+
+const getUniqueUsers = (canvasId) => {
+  const uniqueUsers = [];
+  const seenIds = new Set();
+  if (!roomUsers[canvasId]) return [];
+
+  Object.values(roomUsers[canvasId]).forEach(u => {
+    if (!seenIds.has(String(u.userId))) {
+      seenIds.add(String(u.userId));
+      uniqueUsers.push(u);
+    }
+  });
+  return uniqueUsers;
+};
 
 
 io.on("connection", (socket) => {
+  // Extract userId from token for global tracking
+  let currentUserId = null;
+  const authHeader = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, SECRET_KEY);
+      currentUserId = decoded.userId;
+      if (!globalUsers[currentUserId]) globalUsers[currentUserId] = new Set();
+      globalUsers[currentUserId].add(socket.id);
+    } catch (e) { }
+  }
   /* Join Canvas Room */
   socket.on("joinCanvas", async ({ canvasId }) => {
     try {
@@ -124,7 +152,7 @@ io.on("connection", (socket) => {
         sharedEmails: sharedEmails
       });
 
-      io.to(canvasId).emit("presenceUpdate", Object.values(roomUsers[canvasId]));
+      io.to(canvasId).emit("presenceUpdate", getUniqueUsers(canvasId));
       socket.to(canvasId).emit("notification", {
         message: `${decoded.email || "Someone"} joined the canvas`,
         type: "success"
@@ -202,15 +230,70 @@ io.on("connection", (socket) => {
     }
   });
 
+  /* Invite Response Handling */
+  socket.on("respondToInvite", async ({ canvasId, inviterId, response }) => {
+    try {
+      const decoded = jwt.verify(
+        socket.handshake.auth?.token?.split(" ")[1] || socket.handshake.headers?.authorization?.split(" ")[1],
+        SECRET_KEY
+      );
+      const userId = decoded.userId;
+
+      if (response === "accepted") {
+        const canvas = await Canvas.findById(canvasId);
+        if (canvas) {
+          if (!canvas.shared.includes(userId)) {
+            canvas.shared.push(userId);
+            await canvas.save();
+          }
+
+          // Notify Inviter
+          if (globalUsers[inviterId]) {
+            globalUsers[inviterId].forEach(sid => {
+              io.to(sid).emit("notification", {
+                message: `${decoded.email} accepted your invitation!`,
+                type: "success"
+              });
+              io.to(sid).emit("canvasShared", { userId }); // Refresh sidebar
+            });
+          }
+
+          // Notify Invitee (Self)
+          socket.emit("notification", { message: "You have joined the canvas!", type: "success" });
+          socket.emit("canvasShared", { userId }); // Refresh sidebar
+        }
+      } else {
+        // Notify Inviter of rejection
+        if (globalUsers[inviterId]) {
+          globalUsers[inviterId].forEach(sid => {
+            io.to(sid).emit("notification", {
+              message: `${decoded.email} rejected your invitation.`,
+              type: "error"
+            });
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Invite response error:", error);
+    }
+  });
+
   /* Disconnection Handler */
   socket.on("disconnect", () => {
+    // Cleanup globalUsers
+    if (currentUserId && globalUsers[currentUserId]) {
+      globalUsers[currentUserId].delete(socket.id);
+      if (globalUsers[currentUserId].size === 0) {
+        delete globalUsers[currentUserId];
+      }
+    }
 
     // Cleanup roomUsers
     for (const canvasId in roomUsers) {
       if (roomUsers[canvasId][socket.id]) {
         delete roomUsers[canvasId][socket.id];
         // Notify others in that room
-        io.to(canvasId).emit("presenceUpdate", Object.values(roomUsers[canvasId]));
+        io.to(canvasId).emit("presenceUpdate", getUniqueUsers(canvasId));
         io.to(canvasId).emit("cursorRemove", { socketId: socket.id });
 
         if (Object.keys(roomUsers[canvasId]).length === 0) {

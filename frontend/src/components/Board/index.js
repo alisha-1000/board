@@ -350,6 +350,7 @@ function Board({ id }) {
               className={classes.userBadge}
               style={{ backgroundColor: getUserColor(user.email) }}
               data-email={user.email}
+              title={user.email}
               role="status"
               aria-label={`User ${user.email} is active`}
             >
